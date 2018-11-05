@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>leveldb-memtable</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h2 id="toc_0"><strong>LevelDB中的Memtable</strong></h2>
+
+<h3 id="toc_1">介绍</h3>
+
+<p>LevelDB中的数据是存储在磁盘上的，采用了<a href="http://ov6v82oa9.bkt.clouddn.com/download.pdf">LSM-Tree</a>实现，LSM-Tree将磁盘的随机写转换成顺序写，大大提高了写入速度(但是正因为如此LevelDB随机读的性能一般，也就是说LevelDB适用于查询较少而写较多的场景)，LSM-Tree将索引树结构拆分成一大一小两颗树， 较小的一颗常驻在内存当中， 较大的一颗持久化到磁盘，在内存树大小到达一定的上限之后会和磁盘树发生归并操作，而归本操作本身也是顺序写的过程，本篇将会介绍常驻在内存中的树，在LevelDB中也就是Memtable.</p>
+
+<h3 id="toc_2">Comparator</h3>
+
+<p>在介绍里已经提到过了LevelDB中的数据都是有序存放的， 那么想要知道数据是按照什么规则进行排序的， 我们需要先了解一下LevelDB中三种比较器， 下面贴出每种比较器所对应的Key的格式以及比较器的具体流程.</p>
+
+<ul>
+<li>UserKeyComparator: 这个比较器是对用户自己的Key进行排序的，用户可以自己指定这个Compacter，让这个比较器按照用户自己定义的规则进行排序，如果没有指定，默认是BytewiseComparator(), 比较的规则是字典序小的在前面.</li>
+<li>InternalKeyComparator: 在用户传入UserKey之后, LevelDB会将当前的操作类型(kTypeDeletion = 0x0 或者kTypeValue = 0x1), 还有当前操作的Sequence以及一起Encode成一个8 Bytes的数字追加到UserKey后面，这就形成了InternalKey，InternalKeyComparator内部会持有上面的UserKeyComparator，比较的规则是先取出UserKey进行比较，UserKey小的在前，大的在后，如果UserKey相同，则取InternalKey最后8位进行比较(实际上就是比较Sequence的大小，因为不同的记录Sequence肯定是不一样的，所以这里不会存在相同的场景)，Sequence大的在前，小的在后(UserKey相同的情况下，Sequence大的那个记录较新)</li>
+<li>KeyComparator:这个比较器就是Memtable持有的比较器了，在KeyComparator内部会持有上面的InternalKeyComparator, 在KeyComparator内部的operator()接口传入两个Memtable Key，内部调用GetLengthPrefixedSlice()方法从两个Memtable Key中获取到两个Internal Key, 最后就会调用InterKeyComparator的compact方法来比较两个Internal Key的大小.</li>
+</ul>
+
+<div><pre><code class="language-cpp">/*
+ * ******************************** Buf Format ********************************
+ *
+ *   User Key
+ *   |     &lt;Key&gt;      |
+ *     Key Size Bytes
+ *   
+ *   Internal Key
+ *   |     &lt;Key&gt;      | &lt;SequenceNumber + ValueType&gt; |
+ *     Key Size Bytes              8 Bytes
+ *   
+ *   Memtable Key
+ *  |  &lt;Internal Key Size&gt;  |      &lt;Key&gt;      | &lt;SequenceNumber + ValueType&gt; |   &lt;Value Size&gt;   |      &lt;Value&gt;      |
+ *          1 ~ 5 Bytes        Key Size Bytes              8 Bytes               1 ~ 5 Bytes       Value Size Bytes
+ *
+ */
+ 
+// 不同的UserKey, 字典序小的在前面
+// 相同的UserKey, sequence number大的在前面
+// 由于不同的record, sequence number肯定不一样, 所以虽然逻辑是
+// type大的在前面(kTypeDeletion = 0x0, kTypeValue = 0x1),但是并
+// 不会比较到这一层
+int InternalKeyComparator::Compare(const Slice&amp; akey, const Slice&amp; bkey) const {
+  // Order by:
+  //    increasing user key (according to user-supplied comparator)
+  //    decreasing sequence number
+  //    decreasing type (though sequence# should be enough to disambiguate)
+  int r = user_comparator_-&gt;Compare(ExtractUserKey(akey), ExtractUserKey(bkey));
+  if (r == 0) {
+    const uint64_t anum = DecodeFixed64(akey.data() + akey.size() - 8);
+    const uint64_t bnum = DecodeFixed64(bkey.data() + bkey.size() - 8);
+    if (anum &gt; bnum) {
+      r = -1;
+    } else if (anum &lt; bnum) {
+      r = +1;
+    }
+  }
+  return r;
+}
+
+ int MemTable::KeyComparator::operator()(const char* aptr, const char* bptr)
+    const {
+  // Internal keys are encoded as length-prefixed strings.
+  Slice a = GetLengthPrefixedSlice(aptr);
+  Slice b = GetLengthPrefixedSlice(bptr);
+  return comparator.Compare(a, b);
+}
+ </code></pre></div>
+
+<h3 id="toc_3">MemTableInserter</h3>
+
+<p>在外层会对WriteBatch中的rep_进行解析，通过每一条记录的第一个字节进行判断当前操作的行为，如果是kTypeValue则调用下面的Put方法，反之是kTypeDeletion则调用Delete方法，在这里可以看到就算我们当前是Delete操作，实际上也是调用memtable中的Add方法向其中添加一条记录，只不过这个记录带上了kTypeDeletion标记而已, 所以当我们调用LevelDB的Delete方法删除数据的时候，短时间内db体积不但不会立即减小还可能会有所上升，因为删除操作也是转换成一条记录写入了DB.</p>
+
+<div><pre><code class="language-cpp">class MemTableInserter : public WriteBatch::Handler {
+ public:
+  SequenceNumber sequence_;
+  MemTable* mem_;
+
+  virtual void Put(const Slice&amp; key, const Slice&amp; value) {
+    mem_-&gt;Add(sequence_, kTypeValue, key, value);
+    sequence_++;
+  }
+  virtual void Delete(const Slice&amp; key) {
+    mem_-&gt;Add(sequence_, kTypeDeletion, key, Slice());
+    sequence_++;
+  }
+};</code></pre></div>
+
+<h3 id="toc_4">Memtable::Add()</h3>
+
+<p>通过调用MemTableInserter的Put()/Delete()方法，我们已经可以用SequenceNumber，ValueType，key以及value来表示一个添加或者删除操作了，接下来我们需要将这些数据编码成一条Memtable Key然后将其插入到Memtable当中，而Memtable::Add()方法正是干这个事的，下面贴出代码并且给出编码后一条完整记录的格式.</p>
+
+<div><pre><code class="language-cpp">/*
+ * 这个方法实际上是将SequenceNumber, ValueType, Key, Value这些数据合并压缩到一个buf里面去，并且将其插入到SkipList
+ * 当中，下面我们来看看这个buf的表现形式
+ *
+ * ******************************** Buf Format ********************************
+ *
+ * | &lt;Internal Key Size&gt; |      &lt;Key&gt;      | &lt;SequenceNumber + ValueType&gt; |   &lt;Value Size&gt;   |      &lt;Value&gt;      |
+ *       1 ~ 5 Bytes        Key Size Bytes              8 Bytes               1 ~ 5 Bytes       Value Size Bytes
+ *
+ * Internal Key Size ： 这个存储的是Key的长度 + 存储SequenceNumber和ValueType所需的空间(8 Bytes)
+ * 至于一个uint32_t类型的数据为什么要1 ~ 5 Bytes进行存储， 后面会细说
+ * Key : 存储了Key的内容
+ * SequenceNumber + ValueType: 这个用一个int64_t类型数字的0 ~ 7 Bits存储ValueType,
+ * 用8 ~ 63 Bits存储SequenceNumber
+ * Value Size : 存储的是Value的长度
+ * Value :存储了Value的内容
+ *
+ * Q: 为什么一个uint32_t类型的数据要用1 ~ 5 Bytes进行存储, 而不是4 Bytes?
+ * A: 看了leveldb的EncodeVarint32()方法之后对其有一个了解, 实际上Varint是
+ * 一紧凑的数字表示方法, 它用一个或者多个Bytes来存储数字, 数值越小的数字可
+ * 以用越少的Btyes进行存储, 这样能减少表示数字的字节数, 但是这种方法也有弊
+ * 端, 如果一个比较大的数字可能需要5 Bytes才能进行存储.
+ *
+ * 原理: 一个Byte有8个字节, 在这种表示方法中最高位字节是一个状态位，而其余
+ * 的7个字节则用于存储数据, 如果该Byte最高位字节为1, 则表示当前数字还没有
+ * 表示完毕, 还需要下一个Byte参与解析, 如果该Byte最高位字节为0, 则表示数字
+ * 部分已经解析完毕
+ *
+ * e.g..
+ * 用varint数字表示方法来存储数字104
+ * 104的二进制表现形式:  01101000
+ * 使用varint数字表现形式只需1 Byte进行存储: 01101000
+ * 这个Byte的最高位为0, 表示表示当前Byte已经是当前解析数字的末尾，
+ * 剩余7位1101000是真实数据, 暂时保留
+ * 将获取到的真实数据进行拼接 1101000 = 01101000
+ * 01101000就是104的二进制表现形式
+ *
+ * 用varint数字表示方法来存储数字11880
+ * 11880的二进制表现形式:  00101110 01101000
+ * 使用varint数字表现形式需要2 Byte进行存储: 11101000 01011100
+ * 其中第一个Byte中的最高位为1, 表示当前数字还没解析完毕还需后面的
+ * Bytes参与解析, 剩余7位1101000是真实数据, 暂时保留
+ * 第二个Byte中最高位为0, 表示当前Byte已经是当前解析数字的末尾,
+ * 剩余7位1011100是真实数据, 暂时保留
+ * 将两次获取的真实数据拼接起来 1011100 + 1101000 = 00101110 01101000
+ * 00101110 01101000就是11880的二进制表现形式
+ */
+void MemTable::Add(SequenceNumber s, ValueType type,
+                   const Slice&amp; key,
+                   const Slice&amp; value) {
+  // Format of an entry is concatenation of:
+  //  key_size     : varint32 of internal_key.size()
+  //  key bytes    : char[internal_key.size()]
+  //  value_size   : varint32 of value.size()
+  //  value bytes  : char[value.size()]
+  size_t key_size = key.size();
+  size_t val_size = value.size();
+  size_t internal_key_size = key_size + 8;
+  const size_t encoded_len =
+      VarintLength(internal_key_size) + internal_key_size +
+      VarintLength(val_size) + val_size;
+  char* buf = arena_.Allocate(encoded_len);
+  char* p = EncodeVarint32(buf, internal_key_size);
+  memcpy(p, key.data(), key_size);
+  p += key_size;
+  EncodeFixed64(p, (s &lt;&lt; 8) | type);
+  p += 8;
+  p = EncodeVarint32(p, val_size);
+  memcpy(p, value.data(), val_size);
+  assert((p + val_size) - buf == encoded_len);
+  table_.Insert(buf);
+}</code></pre></div>
+
+<h3 id="toc_5">SkipList<Key,Comparator>::Insert(const Key&amp; key)</h3>
+
+<p>在MemTable::Add()中将数据编码成一条记录之后我们可以看到末尾调用了table_.Insert()方法，这个table_的类型实际上是一个<a href="https://en.wikipedia.org/wiki/Skip_list">SkipList</a>，所以这个操作就是在SkipList中添加一个结点，LevelDB之所以选择采用跳表而不是B树，红黑树，平衡二叉树等数据结构，个人认为可能是跳表实现简单，数据有序，高度随机生成，并且由于最终LevelDB需要将SkipList中的数据Flush到sst文件当中，SkipList遍历起来比各种树更加高效.  </p>
+
+<div><pre><code class="language-cpp">/*
+ *  ——
+ * |11|
+ * |10|
+ * | 9|
+ * | 8|
+ * | 7|
+ * | 6|
+ * | 5|
+ * | 4|
+ * | 3|
+ * | 2| ---------------------\   |2| --------&gt; NULL
+ * | 1| --------\  |1|--------\  |1| --------&gt; NULL
+ *  --       -      -      -      -      -
+ * head_ -&gt; &quot;a&quot; -&gt; &quot;b&quot; -&gt; &quot;c&quot; -&gt; &quot;e&quot; -&gt; &quot;f&quot; -&gt; NULL
+ *
+ *  leveldb中的skiplist最高层数为12(kMaxHeight为12), 上图所示的
+ *  skiplist的高度为3(因为除head_以外最高的节点&quot;d&quot;高度为3), 我们
+ *  可以把leveldb中的skiplist看成一个简单的单链表，但是这个链表
+ *  上的每个结点不单单只包含指向下一个结点的指针，可能包含很多个
+ *  指向后续结点的指针，这样就可以快速的跳过一些不必要的结点，从
+ *  而加快查找速度，对于链表内的结点拥有1 ~ kMaxHeight个指针，一
+ *  结点拥有多少个指向后续元素的指针，这个过程是根据一个随机函数
+ *  生成的
+ *
+ *  往skiplist中插入一个结点的大体步骤有三步
+ *  我们假设当前skiplist的高度为cur_height
+ *
+ *  1. 在各层中(1 ~ cur_height)找到该结点插入位置的前一个结点的指针, 用一个
+ *  零时的指针数组prev[kMaxHeight]进行记录(这步执行完毕之后prev[0 ~ cur_height-1]
+ *  应该是指向各层级当中该结点插入位置的前一个结点的指针, 然后找到指向该结点插入位
+ *  置后一个结点的指针(x), 如果插入位置后面没有结点了，那么这个指针指向的就是NULL.
+ *
+ *  2. 利用一个随机函数生成当前结点的高度random_height(这个高度不得高于kMaxHeight),
+ *  此时如果random_height &gt; cur_height, 那么令prev[cur_height ~ random_height - 1]
+ *  分别指向head_.next_[cur_height ~ random_height - 1], (刚到达一个新的高度h时，该
+ *  层肯定是没有任何数据结点的，所以前置结点肯定是head_.next[h], 而后置结点就是NULL)
+ *  并且更新当前skiplist的高度cur_height = random_height(链表中最高的那个结点的高度, 就是skiplist的高度)
+ *  此时如果random_height &lt; cur_height，便什么也不用做, 因为prev[0 ~ random_height - 1]
+ *  都已经被赋值了，也就是说各层中该结点插入位置的前置结点的位置都已经找到.
+ *
+ *  3. 生成高度为random_height的新结点(new_node), 然后修改指针指向就可以了，这里
+ *  以第一层为例.
+ *
+ *  e.g..
+ *    new_node指的是我们新生成的结点
+ *    new_node.next_[0]指的是新节点第1层所指向的后继结点
+ *    prev[0].next_[0]指的是当前新插入结点的前一个结点原先指向的后继结点
+ *
+ *    第一步我们要做得是令新结点的第一层的后继结点指针指向前一个结点原先指向的后继结点
+ *    new_node.next_[0] = prev[0].next_[0]
+ *    然后我们要做的就是令新节点作为前一个结点的后继结点
+ *    prev[0].next_[0] = &amp;new_node
+ *
+ */
+
+template&lt;typename Key, class Comparator&gt;
+void SkipList&lt;Key,Comparator&gt;::Insert(const Key&amp; key) {
+  // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()
+  // here since Insert() is externally synchronized.
+  Node* prev[kMaxHeight];
+  // x指向当前插入节点的后一个节点的地址，
+  // 如果当前插入节点插入后已经是跳表最后一个节点，则x值为NULL
+  Node* x = FindGreaterOrEqual(key, prev);
+
+  // Our data structure does not allow duplicate insertion
+  assert(x == NULL || !Equal(key, x-&gt;key));
+
+  int height = RandomHeight();
+  if (height &gt; GetMaxHeight()) {
+    for (int i = GetMaxHeight(); i &lt; height; i++) {
+      prev[i] = head_;
+    }
+    //fprintf(stderr, &quot;Change height from %d to %d\n&quot;, max_height_, height);
+
+    // It is ok to mutate max_height_ without any synchronization
+    // with concurrent readers.  A concurrent reader that observes
+    // the new value of max_height_ will see either the old value of
+    // new level pointers from head_ (NULL), or a new value set in
+    // the loop below.  In the former case the reader will
+    // immediately drop to the next level since NULL sorts after all
+    // keys.  In the latter case the reader will use the new node.
+    max_height_.NoBarrier_Store(reinterpret_cast&lt;void*&gt;(height));
+  }
+
+  x = NewNode(key, height);
+  for (int i = 0; i &lt; height; i++) {
+    // NoBarrier_SetNext() suffices since we will add a barrier when
+    // we publish a pointer to &quot;x&quot; in prev[i].
+    x-&gt;NoBarrier_SetNext(i, prev[i]-&gt;NoBarrier_Next(i));
+    prev[i]-&gt;SetNext(i, x);
+  }
+}</code></pre></div>
+
+<h3 id="toc_6">MemTable::Get(const LookupKey&amp; key, std::string* value, Status* s)</h3>
+
+<p>通过前半部分文章我们已经了解了数据在Memtable中是如何排序的，并且也梳理了数据插入到Memtable的流程，接下来给出一个Key，我们如何在Memtable中进行查找就很简单了，先看一下MemTable::Get()方法的传参，发现传入了一个LookupKey, 下面贴出了LookupKey的构造函数，可以看到构造函数实际上就是将传入的user_key和SequenceNumber(还有kValueTypeForSeek)进行了编码，然后存入自己分配的内存空间当中.  </p>
+
+<div><pre><code class="language-cpp">/*
+ * 这个方法实际上就是根据user_key 和 SequenceNumber拼接出来一个LookupKey,
+ * 这个LookupKey的格式和当初插入到memtable中的字符串的前缀是一样的(这样才
+ * 便于字典序的查找)
+ * *************************** Buf Format ***************************
+ *
+ * | &lt;Internal Key Size&gt; |      &lt;Key&gt;      | &lt;SequenceNumber + ValueType&gt; |
+ *       1 ~ 5 Bytes        Key Size Bytes              8 Bytes
+ */
+LookupKey::LookupKey(const Slice&amp; user_key, SequenceNumber s) {
+  size_t usize = user_key.size();
+  size_t needed = usize + 13;  // A conservative estimate
+  char* dst;
+  if (needed &lt;= sizeof(space_)) {
+    dst = space_;
+  } else {
+    dst = new char[needed];
+  }
+  start_ = dst;
+  dst = EncodeVarint32(dst, usize + 8);
+  kstart_ = dst;
+  memcpy(dst, user_key.data(), usize);
+  dst += usize;
+  EncodeFixed64(dst, PackSequenceAndType(s, kValueTypeForSeek));
+  dst += 8;
+  end_ = dst;
+}</code></pre></div>
+
+<p>在前一篇文章<a href="https://axlgrep.github.io/tech/leveldb-write-data-process.html">LevelDB写入与删除记录</a>有提到过LevelDB的快照的概念就是基于Sequence实现的，在LevelDB中不管是执行Put()还是Delete()操作实际上就是向LevelDB中增加记录(每条记录有自己唯一的Sequence,并且这个Sequence是递增的)，在一定的时间内并不会删除数据, 我们在查询数据的时候除了传入user_key之外还会传入ReadOptions，ReadOptions::snapshot不为NULL时表示读取数据库的某一个特定版本。如果Snapshot为NULL，则读取数据库的当前版本，在查找数据的过程当中我们只认为操作号小于快照号的操作是有效操作.</p>
+
+<p>可以看到在MemTable::Get()方法中，迭代器首先是Seek()到了第一个大于等于我们传入的InternalKey的Node, 然后将这个Node其中存储的user<em>key和我们当前查找的user</em>key做匹配，若相同，那么这个节点肯定是user_key最新的操作节点，直接做解析返回结果就行了，若不同，则这个MemTable中便没有我们要查找的数据了，直接返回false.</p>
+
+<div><pre><code class="language-cpp">/*
+ *  eg1..
+ *  SET b v1;
+ *  SET b v2;
+ *  GET b (snapshot = NULL) : Status = ok(), key = b, value = v2;
+ *  head_ -&gt; (set a v) -&gt; (set b v2) -&gt; (set b v1) -&gt; (set c v) -&gt; NULL
+ *            seq = 1      seq = 4        seq = 3      seq = 2
+ *                            ^
+ *                           iter
+ *
+ *  eg2..
+ *  SET b v;
+ *  DELETE b;
+ *  GET b (snapshot = NULL) : Status = NotFound();
+ *  head_ -&gt; (set a v) -&gt; (delete  b) -&gt; (set b v) -&gt; (set c v) -&gt; NULL
+ *            seq = 1       seq = 4       seq = 3      seq = 2
+ *                             ^
+ *                            iter
+ *  eg3..
+ *  SET b v1;
+ *  DELETE b;
+ *  SET b v2;
+ *  Get b (snapshot = NULL) : Status = ok(), key = b, value = v2;
+ *  head_ -&gt;  (set a v) -&gt; (set b v2) -&gt; (delete  b) -&gt; (set b v1) -&gt; (set c v) -&gt; NULL
+ *             seq = 1       seq = 5       seq = 4       seq = 3       seq = 2
+ *                              ^
+ *                             iter
+ *
+ *  eg4..
+ *  SET b v1;
+ *  DELETE b;
+ *  SET b v2;
+ *  Get b (snapshot.number = 4) : Status = NotFound();
+ *  head_ -&gt;  (set a v) -&gt; (set b v2) -&gt; (delete  b) -&gt; (set b v1) -&gt; (set c v) -&gt; NULL
+ *             seq = 1       seq = 5       seq = 4       seq = 3       seq = 2
+ *                                            ^
+ *                                           iter
+ */
+bool MemTable::Get(const LookupKey&amp; key, std::string* value, Status* s) {
+  Slice memkey = key.memtable_key();
+  // 这个Iterator的实现在skiplist.h里面
+  Table::Iterator iter(&amp;table_);
+  // 在SkipList中找到第一个值大于等于memkey的结点
+  iter.Seek(memkey.data());
+  if (iter.Valid()) {
+    // entry format is:
+    //    klength  varint32
+    //    userkey  char[klength]
+    //    tag      uint64
+    //    vlength  varint32
+    //    value    char[vlength]
+    // Check that it belongs to same user key.  We do not check the
+    // sequence number since the Seek() call above should have skipped
+    // all entries with overly large sequence numbers.
+    const char* entry = iter.key();
+    uint32_t key_length;
+    // 在这里判断iter指向结点的user_key是否和传入的相同，如果相同才有必要
+    // 进行判断, 判断当前结点操作的类型，如果是kTypeValue, 则解析出对应的
+    // value进行返回，如果是kTypeDeletion则直接返回NotFound(), 需要注意的
+    // 是当前iter指向的结点肯定是对应user_key最新的操作结点，具体原因可以
+    // 查看LevelDB的三种比较器
+    const char* key_ptr = GetVarint32Ptr(entry, entry+5, &amp;key_length);
+    if (comparator_.comparator.user_comparator()-&gt;Compare(
+            Slice(key_ptr, key_length - 8),
+            key.user_key()) == 0) {
+      // Correct user key
+      const uint64_t tag = DecodeFixed64(key_ptr + key_length - 8);
+      switch (static_cast&lt;ValueType&gt;(tag &amp; 0xff)) {
+        case kTypeValue: {
+          Slice v = GetLengthPrefixedSlice(key_ptr + key_length);
+          value-&gt;assign(v.data(), v.size());
+          return true;
+        }
+        case kTypeDeletion:
+          *s = Status::NotFound(Slice());
+          return true;
+      }
+    }
+  }
+  return false;
+}</code></pre></div>
+
+<h3 id="toc_7">总结</h3>
+
+<p>Memtable在LevelDB中所起到的作用是在内存层面提供了一个随机写的容器，相当于一层LevelDB对外的屏障，肩负着最大的写入压力， 当Memtable的体积达到一个上限，Memtable就会转换成Immutable Memtable，然后紧接着放到后台执行Compact操作，转换成Level 0层的sst文件，这样就使Immutable Memtable中的数据落地了，实际上Memtable和Immutable Memtable的结构完全相同，只不过前者是可读可写，后者只是可读的而已.</p>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+<script type="text/javascript">
+Prism.languages.cpp=Prism.languages.extend("c",{keyword:/\b(alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,"boolean":/\b(true|false)\b/,operator:/[-+]{1,2}|!=?|<{1,2}=?|>{1,2}=?|\->|:{1,2}|={1,2}|\^|~|%|&{1,2}|\|?\||\?|\*|\/|\b(and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/}),Prism.languages.insertBefore("cpp","keyword",{"class-name":{pattern:/(class\s+)[a-z0-9_]+/i,lookbehind:!0}});
+</script>
+
+
+</body>
+
+</html>
