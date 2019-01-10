@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>leveldb-tablecache</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h2 id="toc_0"><strong>LevelDB的TableCache</strong></h2>
+
+<h3 id="toc_1">介绍</h3>
+
+<p>前一篇博客介绍过LevelDB数据是落盘的，而数据在磁盘上的表现形式就是SST文件，如果我们要查找的数据在Memtable和Immutable Memtable中都找不到，那我们就需要打开sst文件，首先解析它的Index Block，然后再通过其中的索引信息到对应的Data Block中进行查找了，如果每次都sst查询操作都经历上述步骤，效率之低可想而知，为此LevelDB引入了TableCache来缓存已经打开的sst文件以及对应的Index Block，这样如果需要对某个SST文件进行访问而它恰好又在Table Cache中，就可以直接从内存中进行读取，访问效率大大提升，同时为了避免将过多的SST文件信息都存在Table Cache中，LevelDB使用ShardedLRUCache，控制进程打开的文件句柄数以及内存的使用量，本篇博客会介绍TableCache的结构以及缓存策略.</p>
+
+<h3 id="toc_2">TableCache缓存的数据</h3>
+
+<p>上面提到了，TableCache用于缓存已经打开的sst文件以及对应的Index Block，方便快速的对SST文件进行访问，我们知道每个SST文件都有自己独立的编号，所以这个编号自然而然的成为了我们在TableCache中查找对应SST文件信息的key，而value的内容包括指向一个RandomAccessFile的指针以及指向Table的指针(这value中的这两个对象在堆上进行分配，我们在清除value的时候需要手动释放空间)，而Table中存有了对应sst文件的整个Index Block内容，可见还是会占据一定量的内存空间，下面是Table Cache key/value的结构图.</p>
+
+<p><img src="https://i.imgur.com/Ah3sy91.png" alt=""></p>
+
+<h3 id="toc_3">TableCache的创建</h3>
+
+<p>在LevelDB的DB构造函数中会创建table_cache_，通过options_.max_open_files和常量kNumNonTableCacheFiles的差值table_cache_size来控制table_cache_中缓存打开sst文件的上限.</p>
+
+<div><pre><code class="language-cpp">  // Reserve ten files or so for other uses and give the rest to TableCache.
+  // options.max_open_files记录的是LevelDB最大的可以打开文件描述符的数量,
+  // table_cache_size记录的是table_cache_中最大缓存打开sst文件的数量(实际上就是
+  // 打开了sst文件，并且把index_block读入内存当中)
+  const int table_cache_size = options_.max_open_files - kNumNonTableCacheFiles;
+  table_cache_ = new TableCache(dbname_, &amp;options_, table_cache_size);</code></pre></div>
+
+<p>我们继续跟到TableCache的构造函数里面，发现它实际上是调用了NewLRUCache()方法创建了一个cache_对象.</p>
+
+<div><pre><code class="language-cpp">TableCache::TableCache(const std::string&amp; dbname,
+                       const Options* options,
+                       int entries)
+    : env_(options-&gt;env),
+      dbname_(dbname),
+      options_(options),
+      cache_(NewLRUCache(entries)) {
+}</code></pre></div>
+
+<p>通过查看NewLRUCache(), 我们发现cache_的实际类型原来是ShardedLRUCache</p>
+
+<div><pre><code class="language-cpp">Cache* NewLRUCache(size_t capacity) {
+  return new ShardedLRUCache(capacity);
+}</code></pre></div>
+
+<h3 id="toc_4">ShardedLRUCache</h3>
+
+<p>通过查看ShardedLRUCache的构造方法，我们发现实际上ShardedLRUCache内部就是维护了一个LRUCache的数组，而让内部的这些LRUCache去分摊外界给ShardedLRUCache设定的capacity，ShardedLRUCache中的一系列方法首先通过key进行Hash取最终会分配到对应的LRUCache上进行调用，所以我们对ShardedLRUCache不必过多的关注，直接了解LRUCache的实现即可. </p>
+
+<div><pre><code class="language-cpp">  explicit ShardedLRUCache(size_t capacity)
+      : last_id_(0) {
+    // ShardedLRUCache实际上就是内部维护了多个LRUCache而已,
+    // 在数据插入和查找的时候首先对key进行Hash取模，确认
+    // 数据在哪个LRUCache当中，调用对应LRUCache的方法
+    const size_t per_shard = (capacity + (kNumShards - 1)) / kNumShards;
+    for (int s = 0; s &lt; kNumShards; s++) {
+      shard_[s].SetCapacity(per_shard);
+    }
+  }
+  virtual ~ShardedLRUCache() { }
+  virtual Handle* Insert(const Slice&amp; key, void* value, size_t charge,
+                         void (*deleter)(const Slice&amp; key, void* value)) {
+    const uint32_t hash = HashSlice(key);
+    return shard_[Shard(hash)].Insert(key, hash, value, charge, deleter);
+  }
+  virtual Handle* Lookup(const Slice&amp; key) {
+    const uint32_t hash = HashSlice(key);
+    return shard_[Shard(hash)].Lookup(key, hash);
+  }</code></pre></div>
+
+<p>下面是ShardedLRUCache的结构，实际上就是由一个LRUCache的数组构成.</p>
+
+<p><img src="https://i.imgur.com/S9d8lYa.png" alt=""></p>
+
+<h3 id="toc_5">LRUHandle</h3>
+
+<p>在看LRUCache之前我们先来了解一下LRUCache内部缓存的对象LRUHandle, 由于LRUCache缓存数据需要记录一些额外的信息，所以LevelDB将用户要缓存的key/value加上一些缓存必须的额外信息封装成了一个LRUHandle对象，例如deleter(由于value指针指向的内容大都是用户自己在堆上进行分配的，所以在LRUCache抛弃某些数据的时候需要有一个回调来释放value指向的对象)，next_hash(用于HandleTable，指向下一个LRUHandle对象), next和prev(用于lru_或者in_use_环形双向链表)，charge(可以理解为当前LRUHandle所占据的空间，如果当前LRUCache所有LRUHandle charge的和已经大于capacity_的值了，那就需要对那些老旧的LRUHandle对象进行清理了)</p>
+
+<p>需要额外注意一下占据一个字节的key_data对象，因为在用户还没有存入对应的key/value之前，对于value，实际上就是一个指针的空间，但是key的长度我们就不知道了，所以我们在这里先预分配1个Byte的空间，等到实际存入数据的时候再根据key的长度对LRUHandle分配对应的空间</p>
+
+<div><pre><code class="language-cpp">struct LRUHandle {
+  void* value;                                // 由于value是个指针，指向的内容可能是我们自己在堆上
+  void (*deleter)(const Slice&amp;, void* value); // 分配的空间，所以我们要自己定义一个方法对其进行回收
+  LRUHandle* next_hash;  // 用于指向HandleTable中其下一个LRUHandle的指针
+  LRUHandle* next;       // next和prev是用于LRUCache中lru_或者in_use_环形双链表当中, 而
+  LRUHandle* prev;       // 当前LRUHandle要么在lru_中，要么在in_use_中, 不可能同时存在
+  size_t charge;      // TODO(opt): Only allow uint32_t?
+  size_t key_length;
+  bool in_cache;      // Whether entry is in the cache.
+  uint32_t refs;      // References, including cache reference, if present.
+  uint32_t hash;      // Hash of key(); used for fast sharding and comparisons
+  char key_data[1];   // Beginning of key
+
+  Slice key() const {
+    // next_ is only equal to this if the LRU handle is the list head of an
+    // empty list. List heads never have meaningful keys.
+    assert(next != this);
+
+    return Slice(key_data, key_length);
+  }
+};</code></pre></div>
+
+<h3 id="toc_6">LRUCache</h3>
+
+<p>LRUCache实际上Least Recently Used Cache的缩写，实际上就是最近最少使用的意思，LRUCache根据数据的历史访问记录来进行数据的淘汰，其核心思想是 ‘如果数据最近被访问，那么该数据将来被访问的几率也更高’</p>
+
+<p>下面先给出LRUCache的结构图，我们可以发现LRUCache实际上是由三大组件构成，HandleTable(HandleTable的作用是存储实际的数据，内部实际上是一个数组，数组的元素是指向一个LRUHandle的单链表的表头元素，当需要向Handle Table中插入数据的时候，先根据用户数据的key计算出一个hash值，然后根据这个hash值确定数据应该存储在HandleTable中的哪一条单链表上)，lru_和in_use_两者的结构是完全相同的都是环形双链表，lru_里存储的是之前被使用过，但是当前外界没有引用的LRUHandle对象，而in_use_中存储的是目前外界正在使用的LRUHandle对象，所以在HandleTable中存储的LRUHandle对象要么在lru_要么在in_use_中</p>
+
+<p><img src="https://i.imgur.com/xuRLWKN.png" alt=""></p>
+
+<h3 id="toc_7">LRUCache::Insert</h3>
+
+<p>对于Cache，最重要的方法就是插入和查找了，下面贴出了LRUCache的Insert方法，可以看到用户的key/value对象被封装成了一个LRUHandle对象，然后被插入到了table_当中(这个table实际上就是上图中的HandleTable)，然后再Insert方法的末尾有一个循环用于判断当前LRUCache中存储的数据是否已经达到了上限，并且把哪些很久没有被放访问的并且已经超出容量上限的数据给清除掉。</p>
+
+<p>注意以下几个细节</p>
+
+<ul>
+<li>在上面我们已经说过了由于事先不知道用户的Key准确的size, LRUHandle预先只为Key分配了一个字节的空间，所以在真正为LRUHandle对象分配空间的时候采用了 malloc(sizeof(LRUHandle) - 1 + key.size()))</li>
+<li>由于调用Insert方法之后会返回一个Handle指针给用户，所以在将其插入到HandleTable之前，我们需要将其也插入到in_use_双向链表中，表示当前这个LRUHandle对象正在被外部使用，而当外界使用完毕之后需要调用Release将这个对象释放</li>
+<li>由于我们向LRUCache中插入数据是以Key作为索引的，所以我们再插入一个和LRUCache中具有相同key的新对象的时候，我们需要将老的对象给释放掉，所以也就有了FinishErase(table_.Insert(e));</li>
+</ul>
+
+<div><pre><code class="language-cpp">Cache::Handle* LRUCache::Insert(
+    const Slice&amp; key, uint32_t hash, void* value, size_t charge,
+    void (*deleter)(const Slice&amp; key, void* value)) {
+  MutexLock l(&amp;mutex_);
+
+  // 因为LRUHandle中的key_data默认是一个Bytes，
+  // 为了存下key, 还需要多分配(key.size() - 1)个Bytes
+  LRUHandle* e = reinterpret_cast&lt;LRUHandle*&gt;(
+      malloc(sizeof(LRUHandle)-1 + key.size()));
+  e-&gt;value = value;
+  e-&gt;deleter = deleter;
+  e-&gt;charge = charge;
+  e-&gt;key_length = key.size();
+  e-&gt;hash = hash;
+  e-&gt;in_cache = false;
+  e-&gt;refs = 1;  // for the returned handle.
+  memcpy(e-&gt;key_data, key.data(), key.size());
+
+  if (capacity_ &gt; 0) {
+    e-&gt;refs++;  // for the cache&#39;s reference.
+    e-&gt;in_cache = true;
+    LRU_Append(&amp;in_use_, e);
+    usage_ += charge;
+    // table_.Insert(e)返回非NULL，表示这次是
+    // 替换节点，而不是新增节点，而返回值是指
+    // 向被替换节点的指针
+    FinishErase(table_.Insert(e));
+  } else {  // don&#39;t cache. (capacity_==0 is supported and turns off caching.)
+    // next is read by key() in an assert, so it must be initialized
+    e-&gt;next = NULL;
+  }
+
+  // 在lru_环形双链表里的LRUHandle，它的refs值必然是1, 因为
+  // 没有外界客户端对其进行引用, 这时候先调用table_.Remove()
+  // 方法将这个节点从HandleTable中移除，然后再调用FinishErase
+  // 方法将这个节点从lru_中移除, 最后调用deleter将这个节点进行
+  // 析构，释放内存, 如此循环，直到usage_小于capacity_或者
+  // lru_环形链表已经为空
+  while (usage_ &gt; capacity_ &amp;&amp; lru_.next != &amp;lru_) {
+    LRUHandle* old = lru_.next;
+    assert(old-&gt;refs == 1);
+    bool erased = FinishErase(table_.Remove(old-&gt;key(), old-&gt;hash));
+    if (!erased) {  // to avoid unused variable when compiled NDEBUG
+      assert(erased);
+    }
+  }
+
+  return reinterpret_cast&lt;Cache::Handle*&gt;(e);
+}</code></pre></div>
+
+<h3 id="toc_8">HandleTable</h3>
+
+<p>我们知道调用LRUCache的Insert方法，数据最终还是会落到HandleTable上来，下面我们来看一下数据是怎么插入到HandleTable中去的, 可以看到首先调用了FindProinter()方法会返回一个指向&#39;目标结点&#39;指针的指针，通过转换我们得到一个old指针，这是一个指向&#39;目标结点&#39;的指针，如果这个指针指向的内容不为空，表示当前是替换结点(当前插入的key, 在HandleTable中已经存在), 反之就是新插入结点, 在新插入结点之后在必要的时候会ReHash对list_做扩容的操作，维持高效的查找效率</p>
+
+<div><pre><code class="language-cpp">  /* e.g..
+   *
+   *  head_ -&gt; NULL
+   *  这是一个空链表的初始状态, 这时候我们要插入一个node_a, 我们通过
+   *  FindPointer()方法会返回一个指向head_的指针(head_本身就是一个指                                                                                                                              *  针,head_的初值为NULL), old = *ptr, 那么old == NULL, 接着我们再
+   *  为结点的后继指针赋值, node_a-&gt;next_hash = NULL, (这里没有后继结                                                                                                                             *  点, 所以是NULL), 最后令*ptr = &amp;node_a(在这里我们完全可以把*ptr
+   *  等同于head_, 就是我们的head_指向了node_a.                                                                                                                                                   *
+   *  插入第一个结点以后的链表为:
+   *  head_ -&gt; node_a -&gt; NULL
+   *
+   *
+   *  此时我再在该链表中插入第二个结点node_b1, 我们通过FindPointer()
+   *  方法会返回一个指向node_a-&gt;next_hash的指针, 由于*ptr的值在当前
+   *  实际上就是node_a-&gt;next_hash的值, 所以old == NULL, 然后我们再令
+   *  node_b1-&gt;next_hash = NULL, 最后令*ptr = &amp;node_b1, 我们就完成了
+   *  node_b1的插入(*ptr = &amp;node_b1相当于node_a-&gt;next_hash = node_b1)
+   *
+   *  插入第二个结点以后的链表为:
+   *  head_ -&gt; node_a -&gt; node_b1 -&gt; NULL
+   *
+   *  如果此时我们再插入一个与node_b1拥有相同key和hash的node_b2, 我们通过
+   *  FindPointer()方法会也会返回一个指向node_a-&gt;next_hash的指针(由于链表中
+   *  已经存在与我们当前插入结点key, hash相同的结点了, 所以没有遍历到链表
+   *  的末尾就提前返回了), 此时old == &amp;node_b1, 然后我们将node_b2的后继结
+   *  点指针指向node_b1后继结点指针指向的内容, 由于node_b1-&gt;next_hash为NULL
+   *  所以node_b2-&gt;next_hash也指向NULL, 最后令*ptr = &amp;node_b2, 我们就完成
+   *  了node_b2的插入(*ptr = &amp;node_b2相当于node_a-&gt;next_hash = node_b2)
+   *
+   *  最后链表状态为:
+   *  head_ -&gt; node_a -&gt; node_b2 -&gt; NULL
+   */
+
+  LRUHandle* Insert(LRUHandle* h) {
+    LRUHandle** ptr = FindPointer(h-&gt;key(), h-&gt;hash);
+    LRUHandle* old = *ptr;
+    h-&gt;next_hash = (old == NULL ? NULL : old-&gt;next_hash);
+    *ptr = h;
+    // old == NULL表示新添加节点，需要对elems_进行累加
+    // 反之是替换之前的节点
+    if (old == NULL) {
+      ++elems_;
+      if (elems_ &gt; length_) {
+        // Since each cache entry is fairly large, we aim for a small
+        // average linked list length (&lt;= 1).
+        Resize();
+      }
+    }
+  }</code></pre></div>
+
+<p>下面再看一下HandleTable::Insert中调用的FindPointer(), 我认为这是整个HandleTable中比较关键的一个方法，由于涉及了二级指针，理解起来稍微有点绕，所以下面给出了example方便理解</p>
+
+<div><pre><code class="language-cpp">  // 这是整个HandleTable最关键的一个方法, 作用是给出一个key和他
+  // 与之对应的hash值, 在HandleTable中找出指向其所在的位置的指针,
+  // 并且返回一个指向这个指针的指针
+  //
+  // 首先根据hash值和当前数组的长度信息进行位运算，得出当前给定的
+  // key应该在哪个链表当中, 然后获取到这个链表的head.
+  // 获取到这个链表的head之后我们遍历这个链表的每个结点, 逐一匹配
+  // key和hash值.
+  //
+  // 返回的指针分为三种情况
+  //
+  // 空链表的情况
+  // head_ -&gt; NULL
+  // 那么这时候就是返回一个指向head_指针的指针
+  //
+  // 目标结点在链表中已经存在的情况
+  // head_ -&gt; node_a -&gt; node_b -&gt; node_c -&gt; NULL
+  // 这时候我们如果要找node_b结点，那么返回的是
+  // 一个指向node_a-&gt;next_hash指针的指针
+  //
+  // 目标结点在链表中不存在的情况
+  // head_ -&gt; node_a -&gt; node_b -&gt; node_c -&gt; NULL
+  // 这时候如果我们需要寻找node_d结点, 那么返回的
+  // 是一个指向node_c-&gt;next_hash指针的指针
+  //
+  // Return a pointer to slot that points to a cache entry that
+  // matches key/hash.  If there is no such cache entry, return a
+  // pointer to the trailing slot in the corresponding linked list.
+  LRUHandle** FindPointer(const Slice&amp; key, uint32_t hash) {
+    LRUHandle** ptr = &amp;list_[hash &amp; (length_ - 1)];
+    while (*ptr != NULL &amp;&amp;
+           ((*ptr)-&gt;hash != hash || key != (*ptr)-&gt;key())) {
+      ptr = &amp;(*ptr)-&gt;next_hash;
+    }
+    return ptr;
+  }</code></pre></div>
+
+<h3 id="toc_9">总结</h3>
+
+<p>TableCache引入主要是为了能够快速的访问sst文件中的数据，其中存储的是打开sst文件的句柄，以及其中的Index Block，如果我们需要访问一个sst文件，而其数据正好在TableCache当中，我们就不需要重新打开文件，并且将Index Block中的数据从磁盘读取并且解析到内存当中了，效率是有比较大的提升的，但是如果缓存的sst文件信息过多，Index Block占据的内存空间也是不容小觑的，好在我们可以通过options_.max_open_files来控制LevelDB打开sst文件的上限，从而对其占用的内存做出一定的限制，实际上就是时间换空间或者空间换时间的思想，在使用过程中需要自己做出权衡.</p>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+<script type="text/javascript">
+Prism.languages.cpp=Prism.languages.extend("c",{keyword:/\b(alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,"boolean":/\b(true|false)\b/,operator:/[-+]{1,2}|!=?|<{1,2}=?|>{1,2}=?|\->|:{1,2}|={1,2}|\^|~|%|&{1,2}|\|?\||\?|\*|\/|\b(and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/}),Prism.languages.insertBefore("cpp","keyword",{"class-name":{pattern:/(class\s+)[a-z0-9_]+/i,lookbehind:!0}});
+</script>
+
+
+</body>
+
+</html>
