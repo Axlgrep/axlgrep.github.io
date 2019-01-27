@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>leveldb-iterator</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h2 id="toc_0"><strong>LevelDB中的Iterator</strong></h2>
+
+<h3 id="toc_1">介绍</h3>
+
+<p>LevelDB作为一个非常高效的kv数据库，得益于其使用了LSM Tree的存储模型，写入性能十分强悍，但是作为数据库并不是一味的写入数据，必要的时候我们还需要对数据进行遍历获取，这时候我们需要一个组件来对LevelDB中存储的数据进行批量的访问，这个组件正是我们这篇博客要介绍的Iterator，通过之前的博客我们了解到LevelDB中存储的数据分布在Memtable，Immutable Memtable，以及各层Level的sst文件当中(而且Level 0层的sst文件之间还可能有overlap)，因为访问各个位置数据的方式并不完全相同，所以LevelDB中定义了多种类型的Iterator，在不同的场景使用不同的Iterator，在某些特定的场景下甚至需要对几个不同的Iterator进行组合使用，下面我们会一一介绍.</p>
+
+<h3 id="toc_2">接口</h3>
+
+<p>尽管访问不同位置的对应Iterator的实现各不相同，但是Iterator的作用无非就是定位，遍历以及获取，为此LevelDB定义了一个Iterator基类，基类中列出了这些必要的纯虚方法，继承Iterator的子类只需实现这些方法即可.</p>
+
+<ul>
+<li>判断当前Iterator指向的位置是否有效: Valid()</li>
+<li>定位到某个位置获取数据: SeekToFirst(), SeekToLast(), Seek()</li>
+<li>访问当前Iterator指向位置的前驱或者后继: Next(), Prev()</li>
+<li>访问当前Iterator指向的位置的数据信息: key(), value(), status()</li>
+<li>注册方法在Iterator析构的时候对当前Iterator持有的数据进行释放: RegisterCleanup()</li>
+</ul>
+
+<h3 id="toc_3">基础的Iterator</h3>
+
+<ol>
+<li><p>MemTableIterator</p>
+
+<ul>
+<li>主要用于获取Memtable/Immutable Memtable中的数据，由于两者的结构完全相同并且底层都是Skip List实现，Skip List有自己的Iterator， MemTableIterator实际上就是对Skip List Iterator的封装，Memtable的结构博客<a href="https://axlgrep.github.io/tech/leveldb-memtable.html">LevelDB中的Memtable</a>中有详细的介绍</li>
+<li>需要注意的是Skip List中的每个节点只有指向后继的指针，而没有指向前驱的指针，在调用MemTableIterator的Prev()接口时内部需要二分查找，找到第一个比当前Node小的Node，所以实际上MemTableIterator的Prev()接口性能是低于Next()接口的，而且options.write-buffer-size越大，性能差距越明显</li>
+</ul></li>
+<li><p>BlockIterator</p>
+
+<ul>
+<li>主要用于遍历SST文件中各个Block中的数据，通过博客<a href="https://axlgrep.github.io/tech/leveldb-sst-file.html">LevelDB的SST File</a>我们对Block的格式已经有所了解，并且知道每一个Block末尾都有重启点信息，所以当我们需要Seek到Block中的某个位置时，Block末尾的重启点信息可以作为我们的一级索引，通过它我们可以Seek到离我们target最近的前一个重启点的位置，然后再向后遍历尝试查找target</li>
+<li>由于Block存储数据的特殊性，当我们调用Next()接口之后，内部解析了当前记录然后可以把指针挪到下一条记录的起始位置方便下一次解析，但是当我们调用Prev()接口，我们并不知道前一条记录的起始位置，我们只能先Seek到离我们当前记录最近的前一个重启点的位置，然后向后遍历找到当前记录的前一条记录，所以和MemTableIterator一样，BlockIterator也是Prev()接口性能低于Next接口()，并且options.block_restart_interval值越大，性能差距越明显</li>
+</ul></li>
+<li><p>LevelFileNumIterator</p>
+
+<ul>
+<li>主要用于遍历除Level0以外其他层的sst文件, 构造LevelFileNumIterator需要传入对应Version和Level的所有FileMetaData集合，由于除了Level0以外其它层的sst文件都没有overlap，并且sst文件可以按照从小到大的顺序在集合中进行存放，所以LevelFileNumIterator的各个接口实现起来就很简单了，Prev()/Next()就是指向集合中前一个/后一个对象，SeekToFirst()/SeekToLast()就是指向集合中第一个/最后一个对象</li>
+<li>Seek(const Slice&amp; target)方法稍微复杂一点，由于FileMetaData中会记录对应的sst文件存储了哪个区间范围内的数据，调用Seek()方法时，我们使用target对FileMetaData集合进行二分查找，找到符合要求的FileMetaData并且指向它</li>
+</ul></li>
+</ol>
+
+<h3 id="toc_4">组合的Iterator</h3>
+
+<p>对于遍历MemTable/Immutable MemTable这种简单的数据结构，我们使用MemTableIterator这种基础的迭代器就能胜任，但是当我们需要遍历一个sst文件，或者遍历某一层的所有sst文件，使用基础迭代器就不可行了，我们需要对这些基础的迭代器进行组合封装成一个新迭代器，这个新迭代器内部的各个基础迭代器进行协同合作才能应付复杂的遍历场景，下面举出LevelDB中几种组合迭代器</p>
+
+<h4 id="toc_5">TwoLevelIterator</h4>
+
+<p>TwoLevelIterator内部维护了index_iter_和data_iter_两个迭代器，我们可以将index_iter_理解为一级索引，负责key到data_iter_的映射，而data_iter_才是真正指向用户数据的，两者协同合作可以快速定位数据，并且不同类型的index_iter_和data_iter_组合也能形成不同的TwoLevelIterator以应付各种场景，下面我们会分别介绍</p>
+
+<ol>
+<li><p>用于遍历某一个sst文件的TwoLevelIterator, 我们暂且称为TableIterator, index_iter_对sst文件中Index Block中的内容进行遍历，并且驱动data_iter_指向新的Data Block，从而遍历整个sst文件的用户数据(创建TableIterator的时候会先去<a href="https://axlgrep.github.io/tech/leveldb-tablecache.html">LevelDB的TableCache</a>中查找对应的sst文件是否已经打开并且将Index Block的内容缓存在Table Cache中)
+<img src="https://i.imgur.com/d9Y7YZ8.png" alt=""></p></li>
+<li><p>用于遍历除Level 0以外其他Level的所有sst文件的TwoLevelIterator, 我们暂且成为ConcatenatingIterator，index_iter_对这一层各个sst文件进行遍历，遍历到某一个sst文件的时候实际类型为TableIterator的data_iter_便指向它对其中用户数据进行遍历
+<img src="https://i.imgur.com/QI2xs1S.png" alt=""></p></li>
+</ol>
+
+<h4 id="toc_6">MergingIterator</h4>
+
+<p>MergingIterator最典型的使用场景是需要对整个DB的数据进行有序遍历的时候，我们知道这时候有的数据在Memtable/Immutable Memtable中，需要Memtable Iterator遍历其中的数据，其他存在磁盘上的数据需要使用TableIterator和ConcatenatingIterator来进行遍历，而MergingIterator实际上就是将这些不同的Iterator管理起来，通过归并的方式使这些存放在不同位置的数据可以整体有序的返回给使用者</p>
+
+<p><img src="https://i.imgur.com/nYKRDKH.png" alt=""></p>
+
+<p>上面就是一个典型MergingIterator结构图，看了下面一段代码之后MergingIterator就能够了解其主要思想，如果是正向遍历则所有的迭代器都先SeekToFirst()一下，然后将这些这些迭代器中指向最小key的那个迭代器作为基准迭代器返回数据，下一次Next的时候只有这个基准迭代器调用Next()方法，然后再调用FindSmallest找出新的基准迭代器返回数据，这样就能让所有的这些迭代器所指向的数据整体有序返回了</p>
+
+<div><pre><code class="language-cpp">// 让Memtable和Immutable Memtable, 还有指向sst
+// 文件的Iterator都SeekToFirst, 然后选出这些
+// Iterator中指向key最小的那个作为当前的基准
+// Iterator
+virtual void SeekToFirst() {
+  for (int i = 0; i &lt; n_; i++) {
+    children_[i].SeekToFirst();
+  }
+  FindSmallest();
+  direction_ = kForward;
+}j
+  
+// 遍历所有的Iterator, 然后找到当前指向Key最小的
+// 那个, 用current_指向这个Iterator
+void MergingIterator::FindSmallest() {
+  IteratorWrapper* smallest = NULL;
+  for (int i = 0; i &lt; n_; i++) {
+    IteratorWrapper* child = &amp;children_[i];
+    if (child-&gt;Valid()) {
+      if (smallest == NULL) {
+        smallest = child;
+      } else if (comparator_-&gt;Compare(child-&gt;key(), smallest-&gt;key()) &lt; 0) {
+        smallest = child;
+      }
+    }
+  }
+  current_ = smallest;
+}</code></pre></div>
+
+<h3 id="toc_7">DBIterator</h3>
+
+<p>使用过LevelDB的同学应该知道，当我们需要遍历整个DB的时候我们会调用db-&gt;NewIterator(options)方法来创建一个迭代器，通过这个迭代器我们可以获取DB中所有符合要求的用户数据，下面看一下NewIterator的实现，实际上NewInternalIterator()创建的是我们上面说过的MergingIterator，可以获取DB中所有的数据。</p>
+
+<div><pre><code class="language-cpp">Iterator* DBImpl::NewIterator(const ReadOptions&amp; options) {
+  SequenceNumber latest_snapshot;
+  uint32_t seed;
+  // 在外部调用NewIterator创建一个迭代器之前，内部首先会创建一个
+  // MergingIterator(内部维护一个迭代器集合, 指向memtable的，指向
+  // immutable memtable的，还有指向level0层各个sst文件的，还有指向
+  // 其他level的...), 然后外层还有一个DBIter持有了Mergingiterator
+  Iterator* iter = NewInternalIterator(options, &amp;latest_snapshot, &amp;seed);
+  // 在这里可以看到，实际上我们创建迭代器的时候可以传入一个snapshot, 这个
+  // snapshot的本质就是一个sequence_number, 如果我们没有传入snapshot, 在
+  // 构造这个迭代器的时候会从调用versions_-&gt;LastSequence(), 来获取最大的
+  // Sequence
+  return NewDBIterator(
+      this, user_comparator(), iter,
+      (options.snapshot != NULL
+       ? reinterpret_cast&lt;const SnapshotImpl*&gt;(options.snapshot)-&gt;number_
+       : latest_snapshot),
+      seed);
+}</code></pre></div>
+
+<p>看到这里也许读者会产生疑问，既然MergingIterator可以遍历DB中所有数据的话为什么用户使用的时候还需要在外层包一个DBIterator? 实际上原因很简单，前面的博客我们有提到过，LevelDB不管是写入数据还是删除数据，在DB内部的表现形式都是一条record， 这就意味着对同一个Key多次操作实际上就是相当于向DB中添加了多条包含同一个Key的不同record，由于越新的操作record上带的Sequence Number越大(也就是说这条record在所有Key相同的record中最靠前), 所以我们判定某一个Key的最新状态是以所有含有这个Key的record中Sequence Number最大的那个为准的，并且LevelDB支持快照的功能，可以创建一个迭代器来遍历某一个快照时刻DB中的用户数据，这时候我们就需要将用户指定快照时刻之后的数据给屏蔽了.</p>
+
+<p>这时候你心里应该对DBIterator的作用有了一个答案了，DBIterator中含有MergingIterator，MergingIterator具有遍历DB中所有数据的功能，这些数据中对同一Key的record可能有多个，实际上除了最新的哪一个其他的都是无效的，而DBIterator的作用正是通过MergingIterator遍历DB中的所有数据，并且把无效的数据过滤掉，只把有效的数据返回给上层用户</p>
+
+<p>下面来看一下DBIterator最常使用的Next()和Prev()方法的实现</p>
+
+<div><pre><code class="language-cpp">void DBIter::Next() {
+  assert(valid_);
+
+  if (direction_ == kReverse) {  // Switch directions?
+    direction_ = kForward;
+    // iter_ is pointing just before the entries for this-&gt;key(),
+    // so advance into the range of entries for this-&gt;key() and then
+    // use the normal skipping code below.
+    if (!iter_-&gt;Valid()) {
+      iter_-&gt;SeekToFirst();
+    } else {
+      iter_-&gt;Next();
+    }
+    if (!iter_-&gt;Valid()) {
+      valid_ = false;
+      saved_key_.clear();
+      return;
+    }
+    // saved_key_ already contains the key to skip past.
+  } else {
+    // 在调用迭代器的Next()的时候, 首先会记录一下当前的迭代器
+    // 指向的user_key, 并且将其保存到saved_key_这个变量当中去
+    // 接着调用下面的FindNextUserEntry的时候就会跳过和saved_key_
+    // 相同的key, 因为最新的数据我们已经遍历到了(user_key相同
+    // sequence number大的表示最新的数据)
+    // Store in saved_key_ the current key so we skip it below.
+    SaveKey(ExtractUserKey(iter_-&gt;key()), &amp;saved_key_);
+  }
+
+  FindNextUserEntry(true, &amp;saved_key_);
+}
+
+/*
+ * skip可以理解为我们已经获取了这个key了, 接下来如果还遍历到了这
+ * 个key, 我们可以直接忽略掉, 因为之前获取的肯定sequence number
+ * 要大, 也就是数据越新
+ *
+ * eg1..
+ *   (D a) 18 -&gt; (S a b) 14 -&gt; NULL
+ *   (S a c) 10 -&gt; (S a f) 8 -&gt; (S b d) 4 -&gt; NULL
+ *
+ * 调用SeekToFirst之后迭代器会指向(S b d) 4
+ *
+ *
+ * eg2..
+ *   (S a b) 18 -&gt; (S a c) 14 -&gt; NULL
+ *   (S a c) 10 -&gt; (S b c) 8 -&gt; (S b d) 4 -&gt; NULL
+ *
+ * 调用SeekToFirst之后迭代器会指向(S a b) 18
+ * 调用Next之后首先会记录一下a这个key, 然后遍历的时候
+ * 直接跳过user_key为a的key, 最后迭代器会指向(S b c)
+ *
+ */
+
+void DBIter::FindNextUserEntry(bool skipping, std::string* skip) {
+  // Loop until we hit an acceptable entry to yield
+  assert(iter_-&gt;Valid());
+  assert(direction_ == kForward);
+  do {
+    ParsedInternalKey ikey;
+    // 当ikey.sequence小于快照的sequence的时候才进行判断,
+    // 否则直接跳过
+    if (ParseKey(&amp;ikey) &amp;&amp; ikey.sequence &lt;= sequence_) {
+      switch (ikey.type) {
+        case kTypeDeletion:
+          // Arrange to skip all upcoming entries for this key since
+          // they are hidden by this deletion.
+          SaveKey(ikey.user_key, skip);
+          skipping = true;
+          break;
+        case kTypeValue:
+          if (skipping &amp;&amp;
+              user_comparator_-&gt;Compare(ikey.user_key, *skip) &lt;= 0) {
+            // Entry hidden
+          } else {
+            valid_ = true;
+            saved_key_.clear();
+            return;
+          }
+          break;
+      }
+    }
+    iter_-&gt;Next();
+  } while (iter_-&gt;Valid());
+  saved_key_.clear();
+  valid_ = false;
+}</code></pre></div>
+
+<p>实际上Next()的流程还是比较简单的，首先调用内部的MergingIterator的Next()方法指向DB中下一条record(仅仅是下一条record，这一条record对用户来说并不一定有效)，然后调用FindNextUserEntry()来查找下一条对用户有效的record，在MergingIterator遍历的过程中遇到带有kTypeDeletion标记的record需要跳过，并且记录当前key，便于后面遇到相同Key能直接跳过(因为带有这个Key的record前面已经出现过了，当前record肯定就是比较老旧的，换句话说就是失效的)，遍历的过程中遇到了符合要求的record便停止遍历(并且记录当前的key，原因和之前一样)，这时候MergingIterator所指向的内容就是用户当前所需要的数据</p>
+
+<div><pre><code class="language-cpp">void DBIter::Prev() {
+  assert(valid_);
+
+  if (direction_ == kForward) {  // Switch directions?
+    // iter_ is pointing at the current entry.  Scan backwards until
+    // the key changes so we can use the normal reverse scanning code.
+    assert(iter_-&gt;Valid());  // Otherwise valid_ would have been false
+    SaveKey(ExtractUserKey(iter_-&gt;key()), &amp;saved_key_);
+    while (true) {
+      iter_-&gt;Prev();
+      if (!iter_-&gt;Valid()) {
+        valid_ = false;
+        saved_key_.clear();
+        ClearSavedValue();
+        return;
+      }
+      if (user_comparator_-&gt;Compare(ExtractUserKey(iter_-&gt;key()),
+                                    saved_key_) &lt; 0) {
+        break;
+      }
+    }
+    direction_ = kReverse;
+  }
+
+  FindPrevUserEntry();
+}
+
+/*
+ *
+ * eg1..
+ *   (D a) 18   -&gt; (S a b) 14 -&gt; NULL
+ *   (S a c) 10 -&gt; (S a f) 8  -&gt; (S b d) 4 -&gt; NULL
+ *
+ *  调用SeekToLast()之后迭代器会指向record (S a f) 8, 但是成员
+ *  变量saved_key_和saved_value_会记录record (S b d) 4
+ *  此时调用key(), value()返回的分别是b, d
+ *
+ *  调用Prev()之后此时iter_已经失效, 并且saved_key_和saved_value_
+ *  里面不存储任何内容, 并且由于value_type == kTypeDeletion还会
+ *  将DBIter的成员变量赋值为false, 宣告DBIter失效
+ *
+ *
+ * eg2..
+ *   (S a b) 20 -&gt; (D a)  18 -&gt; (S a c) 14 -&gt; NULL
+ *   (S a c) 10 -&gt; (S b c) 8  -&gt; (S b d) 4 -&gt; NULL
+ *
+ *  调用SeekToLast()之后迭代器会指向record (S a c) 10, 但是成员
+ *  变量saved_key_和saved_value_会记录record (S b c) 8, 此时调用
+ *  key(), value()返回的分别是b, c
+ *
+ *  调用Prev()之后此时iter_已经失效，但是saved_key_和saved_value_
+ *  会记录record(S a b) 20, 此时调用key(), vlaue()返回分别是a, b
+ *  注意此时虽然iter_已经失效了, 但是DBIter的成员变量valid_被赋值为
+ *  true, 所以外界调用迭代器的Valid()函数返回的是true
+ *  再次调用Prev()之后, 由于下列函数一开始会将value_type设置为
+ *  kTypeDeletion,并且由于iter_是失效的，所以直接走到最下面的逻辑
+ *  将成员变量valid_赋值为false, 宣告DBIter失效
+ *
+ *
+ * eg3..
+ *   (S a b) 18 -&gt; (S b d) 14 -&gt; (S b f) 10 -&gt; NULL
+ *   (S a c) 9  -&gt; (S b c) 7  -&gt; NULL
+ *
+ *  调用SeekToLast()之后迭代器会指向(S a c) 9，但是成员变量
+ *  saved_key_和saved_value_会记录record (S b d) 14
+ *  此时调用key(), value()返回的分别是b, d
+ *
+ *  调用Prev()之后此时iter_已经失效, 但是saved_key_和saved_value_
+ *  会记录record (S a b) 18, 此时调用key(), value()返回分别是a, b
+ *  注意此时虽然iter_已经失效了, 但是DBIter的成员变量valid_被赋值为
+ *  true, 所以外界调用迭代器的Valid()函数返回的是true
+ *  再次调用Prev()之后, 由于下列函数一开始会将value_type设置为
+ *  kTypeDeletion,并且由于iter_是失效的，所以直接走到最下面的逻辑
+ *  将成员变量valid_赋值为false, 宣告DBIter失效
+ */
+void DBIter::FindPrevUserEntry() {
+  assert(direction_ == kReverse);
+
+  ValueType value_type = kTypeDeletion;
+  if (iter_-&gt;Valid()) {
+    do {
+      ParsedInternalKey ikey;
+      if (ParseKey(&amp;ikey) &amp;&amp; ikey.sequence &lt;= sequence_) {
+        if ((value_type != kTypeDeletion) &amp;&amp;
+            user_comparator_-&gt;Compare(ikey.user_key, saved_key_) &lt; 0) {
+          // We encountered a non-deleted value in entries for previous keys,
+          break;
+        }
+        value_type = ikey.type;
+        if (value_type == kTypeDeletion) {
+          saved_key_.clear();
+          ClearSavedValue();
+        } else {
+          Slice raw_value = iter_-&gt;value();
+          if (saved_value_.capacity() &gt; raw_value.size() + 1048576) {
+            std::string empty;
+            swap(empty, saved_value_);
+          }
+          SaveKey(ExtractUserKey(iter_-&gt;key()), &amp;saved_key_);
+          saved_value_.assign(raw_value.data(), raw_value.size());
+        }
+      }
+      iter_-&gt;Prev();
+    } while (iter_-&gt;Valid());
+  }
+
+  if (value_type == kTypeDeletion) {
+    // End
+    valid_ = false;
+    saved_key_.clear();
+    ClearSavedValue();
+    direction_ = kForward;
+  } else {
+    valid_ = true;
+  }
+}
+</code></pre></div>
+
+<p>Prev()的过程和Next()稍有不同，由于是从后向前遍历，MergingIterator并不知道当前自己指向的record是否是用户有效的，所以DBIterator中使用saved_key_和saved_value_两个变量对当前MergingIterator指向的record进行记录，然后MergingIterator才能&#39;放心地&#39;向前再进行遍历，FindPrevUserEntry()实际上就是让MergingIterator向前找到第一条与当前指向含有不同key的record, 这时候用户调用key()，value()获取的分别是saved_key_和saved_value_，而不是MergingIterator当前指向的key，value</p>
+
+<p>从下图可以看出MergingIterator向前遍历找到第一条不是Key2的record并且指向它，并且saved_key_和saved_value_指向Key2的有效用户数据用于返回
+<img src="https://i.imgur.com/Efg2x0l.png" alt=""></p>
+
+<h3 id="toc_8">总结</h3>
+
+<p>正是由于LevelDB各个组件用不同的格式将数据进行存储，所以在获取不同位置的数据时候需要针对其特定的格式进行解析，如果在获取数据的时候都对去关心所有的存储格式，无疑代码可读性会很差，正是由于如此LevelDB的Iterator用确定的特定接口将上层需求和下层实现解耦合，用于遍历特定位置的迭代器只需要继承Iterator，然后根据自己访问数据的特定格式对Iterator定义的几个接口进行实现即可，不得不说这种设计确实十分巧妙</p>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+<script type="text/javascript">
+Prism.languages.cpp=Prism.languages.extend("c",{keyword:/\b(alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,"boolean":/\b(true|false)\b/,operator:/[-+]{1,2}|!=?|<{1,2}=?|>{1,2}=?|\->|:{1,2}|={1,2}|\^|~|%|&{1,2}|\|?\||\?|\*|\/|\b(and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/}),Prism.languages.insertBefore("cpp","keyword",{"class-name":{pattern:/(class\s+)[a-z0-9_]+/i,lookbehind:!0}});
+</script>
+
+
+</body>
+
+</html>
