@@ -1,10 +1,10 @@
-##**LevelDB写入与删除记录**
+## **LevelDB写入与删除记录**
 
-###介绍  
+### 介绍
 
 LevelDB作为一个数据存储引擎，它提供了Put，Delete和Get方法对数据库进行修改和查询操作， 实际上不管是Put操作还是Delete操作, LevelDB都会将其转换成一条记录，然后以顺序写的方式将这条记录追加到log文件的尾部，因为尽管这是一个磁盘的读写操作，但是文件的顺序追加写入效率是很高的，所以并不会导致写入速度降低，如果log文件写入数据成功，那么将这条记录插入到Memtable当中去，本篇文章会介绍LevelDB的一个删除或者写入操作是如何应用到DB当中.
 
-###WriteBatch
+### WriteBatch
 
 执行Put/Delete操作首先是通过一个WriteBatch来表示的，从下面代码可以看到不管是执行Put还是Delete操作，实际上是在WriteBatch的rep_中修改以及追加一些信息，rep\_最开始8个字节用于存储Sequence，表示当前Writebatch中第一个操作所对应的序列号，接下来4个字节用户存储Count，表示当前WriteBatch有多少个Operation，然后紧接着就是count条Operation记录，每一个operation记录就是一个Put操作或者Delete操作.  
 
@@ -41,7 +41,7 @@ void WriteBatch::Delete(const Slice& key) {
 }
 ```
 
-###Writer
+### Writer
 
 在真正的写入操作之前会将WriteBatch封装成一个Write对象, 然后扔到一个队列里面等待消费，我们先来看一下Write对象的定义.
 
@@ -58,7 +58,7 @@ struct DBImpl::Writer {
 };
 ```
 
-###DBImpl::Write()
+### DBImpl::Write()
 
 DBimpl::Write()方法中的流程我们分三个阶段来看:
 
@@ -176,7 +176,7 @@ DBimpl::Write()方法中的流程我们分三个阶段来看:
   return status;
 ```
 
-###DBImpl::MakeRoomForWrite()
+### DBImpl::MakeRoomForWrite()
 
 在调用DBImpl::Write()将数据写入到Memtable之前我们会调用MakeRoomForWrite()， 看函数名是提供空间供数据写入，实际上这个函数里面还是做了很多事情，比如在Level 0层的sst文件数量到达软上限或者硬上限的时候分别执行缓写和阻写操作(因为Level0层的sst文件比较特殊，文件和文件之前可能有overlap, 如果文件过多，在迭代器遍历Level0层的时候会有读放大的问题，所以不能放任不管，有必要对其做一个限制)， 还有在Memtable大小已经大于write_to_buffer上限的时候如果能顺利将其转换成Immutable Memtable并且重新创建一个新的Memtable, 如果当前Immutable Memtable还不为空则可能当前正在做Compact， 这时我们就要等待其完成再做转换了.
 
@@ -259,8 +259,6 @@ Status DBImpl::MakeRoomForWrite(bool force) {
 }
 ```
 
-###总结
+### 总结
 
 通过梳理数据写入流程我们会发现LevelDB每一个操作(不管是写入还是删除)都有一个序列号，这个序列号是递增的，序列号越大表示该操作越新，再深入学习LevelDB代码后会发现，其快照的概念也是基于这个序列号实现的.
-
-

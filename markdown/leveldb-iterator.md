@@ -1,10 +1,10 @@
-##**LevelDB中的Iterator**
+## **LevelDB中的Iterator**
 
-###介绍  
+### 介绍
 
 LevelDB作为一个非常高效的kv数据库，得益于其使用了LSM Tree的存储模型，写入性能十分强悍，但是作为数据库并不是一味的写入数据，必要的时候我们还需要对数据进行遍历获取，这时候我们需要一个组件来对LevelDB中存储的数据进行批量的访问，这个组件正是我们这篇博客要介绍的Iterator，通过之前的博客我们了解到LevelDB中存储的数据分布在Memtable，Immutable Memtable，以及各层Level的sst文件当中(而且Level 0层的sst文件之间还可能有overlap)，因为访问各个位置数据的方式并不完全相同，所以LevelDB中定义了多种类型的Iterator，在不同的场景使用不同的Iterator，在某些特定的场景下甚至需要对几个不同的Iterator进行组合使用，下面我们会一一介绍.
 
-###接口
+### 接口
 尽管访问不同位置的对应Iterator的实现各不相同，但是Iterator的作用无非就是定位，遍历以及获取，为此LevelDB定义了一个Iterator基类，基类中列出了这些必要的纯虚方法，继承Iterator的子类只需实现这些方法即可.
 
  * 判断当前Iterator指向的位置是否有效: Valid()
@@ -13,7 +13,7 @@ LevelDB作为一个非常高效的kv数据库，得益于其使用了LSM Tree的
  * 访问当前Iterator指向的位置的数据信息: key(), value(), status()
  * 注册方法在Iterator析构的时候对当前Iterator持有的数据进行释放: RegisterCleanup()
  
-###基础的Iterator
+### 基础的Iterator
 
 1. MemTableIterator
 	* 主要用于获取Memtable/Immutable Memtable中的数据，由于两者的结构完全相同并且底层都是Skip List实现，Skip List有自己的Iterator， MemTableIterator实际上就是对Skip List Iterator的封装，Memtable的结构博客[LevelDB中的Memtable](https://axlgrep.github.io/tech/leveldb-memtable.html)中有详细的介绍
@@ -28,12 +28,12 @@ LevelDB作为一个非常高效的kv数据库，得益于其使用了LSM Tree的
 	* Seek(const Slice& target)方法稍微复杂一点，由于FileMetaData中会记录对应的sst文件存储了哪个区间范围内的数据，调用Seek()方法时，我们使用target对FileMetaData集合进行二分查找，找到符合要求的FileMetaData并且指向它
 
 	
-###组合的Iterator
+### 组合的Iterator
 
 对于遍历MemTable/Immutable MemTable这种简单的数据结构，我们使用MemTableIterator这种基础的迭代器就能胜任，但是当我们需要遍历一个sst文件，或者遍历某一层的所有sst文件，使用基础迭代器就不可行了，我们需要对这些基础的迭代器进行组合封装成一个新迭代器，这个新迭代器内部的各个基础迭代器进行协同合作才能应付复杂的遍历场景，下面举出LevelDB中几种组合迭代器
 
 
-####TwoLevelIterator
+#### TwoLevelIterator
 
 TwoLevelIterator内部维护了index\_iter\_和data\_iter\_两个迭代器，我们可以将index\_iter\_理解为一级索引，负责key到data\_iter\_的映射，而data\_iter\_才是真正指向用户数据的，两者协同合作可以快速定位数据，并且不同类型的index\_iter_和data\_iter\_组合也能形成不同的TwoLevelIterator以应付各种场景，下面我们会分别介绍
 
@@ -45,7 +45,7 @@ TwoLevelIterator内部维护了index\_iter\_和data\_iter\_两个迭代器，我
 ![](https://i.imgur.com/QI2xs1S.png)
 
 
-####MergingIterator
+#### MergingIterator
 MergingIterator最典型的使用场景是需要对整个DB的数据进行有序遍历的时候，我们知道这时候有的数据在Memtable/Immutable Memtable中，需要Memtable Iterator遍历其中的数据，其他存在磁盘上的数据需要使用TableIterator和ConcatenatingIterator来进行遍历，而MergingIterator实际上就是将这些不同的Iterator管理起来，通过归并的方式使这些存放在不同位置的数据可以整体有序的返回给使用者
 
 ![](https://i.imgur.com/nYKRDKH.png)
@@ -83,7 +83,7 @@ void MergingIterator::FindSmallest() {
 }
 ```
 
-###DBIterator
+### DBIterator
 使用过LevelDB的同学应该知道，当我们需要遍历整个DB的时候我们会调用db->NewIterator(options)方法来创建一个迭代器，通过这个迭代器我们可以获取DB中所有符合要求的用户数据，下面看一下NewIterator的实现，实际上NewInternalIterator()创建的是我们上面说过的MergingIterator，可以获取DB中所有的数据。
 
 ```cpp
@@ -328,5 +328,5 @@ Prev()的过程和Next()稍有不同，由于是从后向前遍历，MergingIter
 从下图可以看出MergingIterator向前遍历找到第一条不是Key2的record并且指向它，并且saved\_key\_和saved\_value\_指向Key2的有效用户数据用于返回
 ![](https://i.imgur.com/Efg2x0l.png)
 
-###总结
+### 总结
 正是由于LevelDB各个组件用不同的格式将数据进行存储，所以在获取不同位置的数据时候需要针对其特定的格式进行解析，如果在获取数据的时候都对去关心所有的存储格式，无疑代码可读性会很差，正是由于如此LevelDB的Iterator用确定的特定接口将上层需求和下层实现解耦合，用于遍历特定位置的迭代器只需要继承Iterator，然后根据自己访问数据的特定格式对Iterator定义的几个接口进行实现即可

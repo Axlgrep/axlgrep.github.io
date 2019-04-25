@@ -1,9 +1,9 @@
-##**LevelDB的版本控制**
+## **LevelDB的版本控制**
 
-###介绍  
+### 介绍
 通过前面的博客我们知道LevelDB中数据的添加与删除实际上是通过追加写的形式实现的，随着数据不断的写入会产生新的sst文件，并且将新产生的sst文件添加到不同Level中也可能会触发该层Level的局部compact, 局部compact执行意味着有新的sst文件的生成以及旧sst文件的销毁，可见LevelDB在不同的时期持有的sst文件是不断变化的，这时候我们就需要一个组件对这些sst文件进行管理了，这个组件就是我们今天要说的LevelDB版本控制系统，这个组件由VersionSet, Version, VersionEdit还有Builder构成，下面我们会一一介绍
 
-###FileMetaData
+### FileMetaData
 既然版本控制系统是用于管理LevelDB不同时期持有的sst文件的，我们先看一个sst文件在版本控制系统中是如何表示的，下面这个结构体就清楚的表示了LevelDB中一个sst文件的状态，通过这个状态信息我们就能确定这个sst文件什么时候可以被销毁，什么时候需要执行Compact操作(Compact的具体内容下篇博客会说)
 
 ```cpp
@@ -19,7 +19,7 @@ struct FileMetaData {
 };
 ```
 
-###VersionSet
+### VersionSet
 在LevelDB中是允许有多个Version同时并存的(随着数据的写入或者compact可能有新的version生成，但是还有老的version被引用)，这时候我们就需要VersionSet组件对这些Version进行统一的管理，VersionSet的作用其实不仅仅是管理Version，实际上LevelDB中触发Compact也和VersionSet密切相关，在这里我们先简单介绍VersionSet是如何管理多个Version的
 
 先看VersionSet中最重要的一个方法
@@ -54,7 +54,7 @@ Q: 随着数据的写入，LevelDB可能会触发Minor Compact(Immutable Memtabl
 A: 其实不用担心这个问题，每个Version内部会记录外界对其的引用(外界通过调用Ref()和Unref()方法来进行引用和解引用)，当外界对某个Version最后一个解引用被调用的时候，这时候析构方法会被调用，在析构函数里面会将当前Version从环形双向链表中剥离(Version内部会记录前驱和后继)
 
 
-###Version
+### Version
 LevelDB用Version表示一个版本的元信息，用FileMetaData表示一个sst文件的元信息，每个Version内部需要记录当前版本对哪些sst文件持有了引用，而LevelDB中的sst文件又是分层存放的，所以Version内部使用了一个成员是FileMetaData指针的二维数组用以指向当前版本各层级所有sst的文件信息(一个sst文件可以由不同的Version引用，所以不同的Version内部可能指向同一个FileMetaData对象)
 
 ![](https://i.imgur.com/hlw40um.png)
@@ -85,7 +85,7 @@ Version::~Version() {
 }
 ```
 
-###VersionEdit
+### VersionEdit
 从名称我们就能了解到这个类实际上是对Version进行编辑的，实际上Version是一个静态的概念，某一个Version一旦生成它就不会改变，而VersionEdit则扮演着一种差量的角色，它表示相邻Version之间的差值，下面代码列出了VersionEdit几个主要的成员变量
 
 ```cpp
@@ -100,7 +100,7 @@ class VersionEdit {
 }
 ```
 
-###VersionSet::Builder
+### VersionSet::Builder
 上面介绍了VersionEdit代表的是Version和Version之间的差值，但是如果我们需要将一个Old Version和VersionEdit组合生成一个新的Version，这时候就需要VersionSet::Builder来实现了，Builder最重要的两个API, 一个是`void Apply(VersionEdit* edit)`, 该方法用于将一个VersionEdit存储的信息先应用到自身(实际上Builder内部有数据结构用于记录VersionEdit中的文件变动信息)，另外一个是`void SaveTo(Version* v)`, 该方法用于将Old Version以及Builder自己存储的文件变动信息有序的应用到一个全新的Version上(Version中除了Level 0层的sst文件是无序存放的， 其他层都是有序的，所以要保证新生产的Version除Level 0层以外其他层的sst文件存储依旧有序), 下面列出两处使用VersionSet::Builder的地方
 
 在进行Minor Compact或者Marjor Compact的时候产生一个VersionEdit，Version N和一个VersionEdit通过Builder就能产生一个全新的Version N+1
@@ -112,14 +112,14 @@ class VersionEdit {
 
 ![](https://i.imgur.com/06jsLsl.png)
 
-###Version持久化
+### Version持久化
 在LevelDB运行期间, 随着数据的写入以及读取可能会触发Compact造成sst文件的增加以及删除, 从而生成新的Version(上面提到过，通过旧的Version以及VersionEdit生成), 为了下次启动DB可以恢复到正确的状态， LevelDB在生成新Version之前，会把作用于这个Version的VersionEdit追加写到Manifest文件末尾，以便下次启动DB的时候从磁盘上的Manifest文件中读取数据进行恢复
 
 下图是LevelDB运行期间, 各版本Version与Manifest中VersionEdit记录的关系, 在重新打开DB时从Manifest中读取Version SnapShot, 然后读取后面的所有VersionEdit记录并且依次作用于VersionSet::Builder, 最后通过SaveTo()方法即可以生成新的Version, 然后将其挂到VersionSet当中, 这时候DB启动就成功了
 
 ![](https://i.imgur.com/aQ8FFYA.png)
 
-###总结
+### 总结
 版本控制我认为是LevelDB中最难理解的一个模块，主要是其和Compact联系异常紧密，由VersionSet控制何时触发Compact，Compact完成之后生成新的Version又存于VersionSet当中，得益于LevelDB将随机写转化为顺序写的特性，sst文件一旦生成就不会再发生变化，一个旧的Version只需要加上sst文件的差值便可以成为一个新的Version，同时VersionSet内部将不同的Version按照环形双向链表进行保存，使之前某个时刻生成的迭代器可以继续访问老版本Version对应的数据，保证了迭代器访问的数据是某一个快照时刻的，不会随着数据的写入而发生变化
 
 另外LevelDB将内存中维护的Version以及Version的更变信息进行落盘，下次Recover DB时读取Manifest文件信息，并且检查当前DB中存在的sst文件是否和Manifest中记录的一致，如果有文件的缺失，那么Recover DB失败向用户报错

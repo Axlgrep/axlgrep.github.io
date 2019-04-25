@@ -1,10 +1,10 @@
-##**LevelDB中的Memtable**
+## **LevelDB中的Memtable**
 
-###介绍  
+### 介绍
 
 LevelDB中的数据是存储在磁盘上的，采用了[LSM-Tree](http://ov6v82oa9.bkt.clouddn.com/download.pdf)实现，LSM-Tree将磁盘的随机写转换成顺序写，大大提高了写入速度(但是正因为如此LevelDB随机读的性能一般，也就是说LevelDB适用于查询较少而写较多的场景)，LSM-Tree将索引树结构拆分成一大一小两颗树， 较小的一颗常驻在内存当中， 较大的一颗持久化到磁盘，在内存树大小到达一定的上限之后会和磁盘树发生归并操作，而归本操作本身也是顺序写的过程，本篇将会介绍常驻在内存中的树，在LevelDB中也就是Memtable.
 
-###Comparator
+### Comparator
 
 在介绍里已经提到过了LevelDB中的数据都是有序存放的， 那么想要知道数据是按照什么规则进行排序的， 我们需要先了解一下LevelDB中三种比较器， 下面贴出每种比较器所对应的Key的格式以及比较器的具体流程.
 
@@ -63,7 +63,7 @@ int InternalKeyComparator::Compare(const Slice& akey, const Slice& bkey) const {
  
 ```
 
-###MemTableInserter
+### MemTableInserter
 
 在外层会对WriteBatch中的rep_进行解析，通过每一条记录的第一个字节进行判断当前操作的行为，如果是kTypeValue则调用下面的Put方法，反之是kTypeDeletion则调用Delete方法，在这里可以看到就算我们当前是Delete操作，实际上也是调用memtable中的Add方法向其中添加一条记录，只不过这个记录带上了kTypeDeletion标记而已, 所以当我们调用LevelDB的Delete方法删除数据的时候，短时间内db体积不但不会立即减小还可能会有所上升，因为删除操作也是转换成一条记录写入了DB.
 
@@ -84,7 +84,7 @@ class MemTableInserter : public WriteBatch::Handler {
 };
 ```
 
-###Memtable::Add()
+### Memtable::Add()
 
 通过调用MemTableInserter的Put()/Delete()方法，我们已经可以用SequenceNumber，ValueType，key以及value来表示一个添加或者删除操作了，接下来我们需要将这些数据编码成一条Memtable Key然后将其插入到Memtable当中，而Memtable::Add()方法正是干这个事的，下面贴出代码并且给出编码后一条完整记录的格式.
 
@@ -163,7 +163,7 @@ void MemTable::Add(SequenceNumber s, ValueType type,
 }
 ```
 
-###SkipList<Key,Comparator>::Insert(const Key& key)
+### SkipList<Key,Comparator>::Insert(const Key& key)
 
 在MemTable::Add()中将数据编码成一条记录之后我们可以看到末尾调用了table_.Insert()方法，这个table\_的类型实际上是一个[SkipList](https://en.wikipedia.org/wiki/Skip_list)，所以这个操作就是在SkipList中添加一个结点，LevelDB之所以选择采用跳表而不是B树，红黑树，平衡二叉树等数据结构，个人认为可能是跳表实现简单，数据有序，高度随机生成，并且由于最终LevelDB需要将SkipList中的数据Flush到sst文件当中，SkipList遍历起来比各种树更加高效.  
 
@@ -263,7 +263,7 @@ void SkipList<Key,Comparator>::Insert(const Key& key) {
 }
 ```
 
-###MemTable::Get(const LookupKey& key, std::string* value, Status* s)
+### MemTable::Get(const LookupKey& key, std::string* value, Status* s)
 
 通过前半部分文章我们已经了解了数据在Memtable中是如何排序的，并且也梳理了数据插入到Memtable的流程，接下来给出一个Key，我们如何在Memtable中进行查找就很简单了，先看一下MemTable::Get()方法的传参，发现传入了一个LookupKey, 下面贴出了LookupKey的构造函数，可以看到构造函数实际上就是将传入的user\_key和SequenceNumber(还有kValueTypeForSeek)进行了编码，然后存入自己分配的内存空间当中.  
 
@@ -386,10 +386,6 @@ bool MemTable::Get(const LookupKey& key, std::string* value, Status* s) {
 }
 ```
 
-###总结
+### 总结
 
 Memtable在LevelDB中所起到的作用是在内存层面提供了一个随机写的容器，相当于一层LevelDB对外的屏障，肩负着最大的写入压力， 当Memtable的体积达到一个上限，Memtable就会转换成Immutable Memtable，然后紧接着放到后台执行Compact操作，转换成Level 0层的sst文件，这样就使Immutable Memtable中的数据落地了，实际上Memtable和Immutable Memtable的结构完全相同，只不过前者是可读可写，后者只是可读的而已.
-
-
-
- 
