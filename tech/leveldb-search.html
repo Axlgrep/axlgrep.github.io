@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>leveldb-search</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h2 id="toc_0"><strong>LevelDB的数据查询</strong></h2>
+
+<h3 id="toc_1">介绍</h3>
+
+<p>通过前面博客的介绍，我们已经对LevelDB数据存储结构以及版本控制系统有了一个比较全面的了解，在本篇博客中会对LevelDB的数据查询流程做一个梳理，也就是当我们调用LevelDB的Get()接口获取一个Key对应的Value时，LevelDB底层是怎么进行高效查询的</p>
+
+<h3 id="toc_2">快照</h3>
+
+<p>在LevelDB运行期间，随着数据的不断写入，整个数据库内部的数据是不断变化的，那我们如何确保我们当前的查询操作不受查询期间数据变化的影响呢，对此LevelDB允许我们为每个查询操作设置一个snapshot，如果用户没有设置snapshot，LevelDB会默认以当前数据库的状态为这次查询操作设置一个snapshot，并且基于此来进行查询，下面代码是Get()方法内部设置snapshot的逻辑</p>
+
+<div><pre><code class="language-cpp">  MutexLock l(&amp;mutex_);
+  SequenceNumber snapshot;
+  if (options.snapshot != NULL) {
+    snapshot = reinterpret_cast&lt;const SnapshotImpl*&gt;(options.snapshot)-&gt;number_;
+  } else {
+    snapshot = versions_-&gt;LastSequence();
+  }</code></pre></div>
+
+<p>实际上snapshot代表的就是数据库的某一个状态，前面的博客有提到过LevelDB会为我们每次写入或者删除操作分配一个序列号，而snapshot的本质就是这个序列号，如果用户对同一个key进行多次的修改(包括删除)，这些修改操作将会被转换成一系列条目进行存储，每个条目都会带上一个序列号，序列号越大的条目代表着其存储的数据越新</p>
+
+<p>假设用户依次执行了三个操作<code>PUT(&quot;tag&quot;, &quot;ooo&quot;)</code>，<code>PUT(&quot;tag&quot;, &quot;xxx&quot;)</code>，<code>DELETE(&quot;tag&quot;)</code>三个操作，LevelDB为这三个操作分配的SequenceNumber分别为92，93，94，当前DB中tag这个Key实际上已经是被删除了的，但是我们如果以92为SnapShot去DB中进行查询的话，那么我们会得到它的Value为<code>&quot;ooo&quot;</code></p>
+
+<p><img src="https://i.imgur.com/m28ZYba.png" alt=""></p>
+
+<h3 id="toc_3">查询流程</h3>
+
+<p>LevelDB数据的写入是先写到Memtable当中，当Memtable的体积达到了用户设置的write-buffer-size之后Memtable便转换成了Immutable Memtable等待刷盘，后台线程将Immutable Memtable先Flush到Level 0层上(如果新生成的SST文件和Level 0层的其他SST文件没有overlap，那么为了避免Level 0层堆积太多SST文件降低查询效率，会直接把新生成的SST文件Flush到Level 1层上)，然后随着数据的增多LevelDB内部会在相邻的Level之间触发Major Compact，低Level的数据会经过清理合并到高Level当中</p>
+
+<p>所以我们Memtable中的数据是最新的，其次是Immutable Memtable, 最后是磁盘上的各Level的SST文件(低Level的SST文件比高Level的SST文件要新，Level 0层的SST文件有overlap，在该层中序列号大的SST文件比序列号小的SST文件要新)，所以我们是先在Memtable和Immutable Memtable中查询，若内存中没有命中我们就去磁盘进行查找，内存中的查找流程还比较简单，就是在SkipList中查询数据，就不做过多的介绍了，本篇博客着重介绍如何在磁盘中的SST文件中查找数据</p>
+
+<p><img src="https://i.imgur.com/Z8rz8m1.png" alt=""></p>
+
+<h3 id="toc_4">SST文件</h3>
+
+<p>在了解如何从磁盘上查询数据之前先看一下SST文件的整体结构，SST文件中Data Block中存储着用户的数据，其他Block存储着当前SST文件的一些元信息方便快速的查询数据，当LevelDB读取一个SST文件时先会读取文件末尾的Footer，Footer中存储着Index Block和MetaIndex Block在文件中的偏移量以及大小信息，Index Block中记录了每个Data Block的索引Key以及对应Block的位置信息，而在MetaIndex Block中目前LevelDB只记录了Filter Block的位置信息，Filter Block的作用就是快速的判断一个Key是否可能存在于一个Data Block当中，由于实现原因，它只能确认一个key一定不存在，但是不能确认一个key一定存在，但是这也一定程度上提高了查询效率</p>
+
+<p><img src="https://i.imgur.com/WPxkUci.png" alt=""></p>
+
+<h4 id="toc_5">Filter Block</h4>
+
+<p>FilterBlockBuilder是构造Filter Block的组件，实现还比较简单，内部维护了一个result_字符串用于存储所有Filter，filter_offsets_记录各个Filter在result_中的位置，在写一个Data Block的时候将Key追加到自身keys_字符串的末尾，并且用start_数组记录每个Key的起始位置，在Data Block写完之后就可以根据keys_和start_得到tmp_keys_，然后根据用户配置的bits_per_key以及tmp_keys_的大小分配一个Filter字符串，根据tmp_keys_中key计算出来的hash值将Filter中特定的bits值设置为1，最后把Filter追加到result_的末尾并且在filter_offsets_中记录新Filter的位置信息</p>
+
+<div><pre><code class="language-cpp">/*
+ * keys_是一个字符串, 我们新添加进来的key都依次追加到keys_字符串的后面
+ * start_集合中元素的类型是整形, 存储的是keys_字符串中各个key的起始位置
+ * tmp_keys_中的元素类型是Slice, Slice存储了指向keys_字符串中各个key的起始位置的指针以及当前key的长度
+ *
+ * e.g..
+ *   我们有一组key: axl, neil, dire
+ *
+ *   下标:       0     1     2     3     4     5     6     7     8     9     10
+ *   keys_:  |  a  |  x  |  l  |  n  |  e  |  i  |  l  |  d  |  i  |  r  |  e  |
+ *   地址:      0x0   0x1   0x2   0x3   0x4   0x5   0x6   0x7   0x8   0x9   0x10
+ *
+ *   start_:    [0][3][7]
+ *   tmp_keys_: [Slice(0x0, 3)][Slice(0x3, 4)][Slice(0x7, 4)]
+ *
+ */</code></pre></div>
+
+<p>下图就是FilterBlock内部的存储结构，橘黄色的部分记录的是result_的内容，是由一系列的Filter字符串构成，绿色部分存储的是filter_offsets_中记录的Filter字符串的位置信息，粉色部分存储的是filter_offsets_的大小</p>
+
+<p><img src="https://i.imgur.com/gOKZml3.png" alt=""></p>
+
+<p>为了例子足够简单，我们假设一个Data Block只有三个Key：<code>Key1</code>，<code>Key2</code>，<code>Key3</code>，为此我们分配了一个大小为15 bits的Filter，经过特定的Hash计算Key1，发现需要在Filter的第1，7和11 bits上置1，Key2需要在第2，8，11 bits上置1，Key3需要在4，13 bits上置1，最终该Data Block的Filter如上图所示</p>
+
+<p>等到需要查询某一个Block是否存在某个Key时只需要找到该Block对应的Filter，然后通过同样的Hash算法计算该Key应该在哪几个bits上为1，如果Filter满足条件则说明Key<strong>可能</strong>存在于该Data Block当中，如果不满足则说明该Key<strong>肯定</strong>不存在于该Block当中(因为不同的Key可能计算出相同bits位置从而产生冲突，就像上面Key1和Key2在11 bits上应该都置1，可以确定的是在相同Key数量的场景下Filter越短冲突的可能性越大从而导致过滤器的作用越小，而Filter的长短是由Key的数量以及构造过滤器时传入的bits_per_key共同决定的，所以为了提高查询效率我们可以将bits_per_key设置大一点(占据磁盘空间，并且Filter Block会被加载到内存里面，空间换时间需要自己做权衡，<a href="https://github.com/Axlgrep/blackwidow">BlackWidow</a>里设置的是10)</p>
+
+<h4 id="toc_6">MetaIndex Block</h4>
+
+<p>在当前LevelDB中MetaIndex Block中只是记录了Filter Block在SST文件中的位置信息，很简单，这里就不做过多的阐述</p>
+
+<h4 id="toc_7">Index Block</h4>
+
+<p>Index Block用于存储该SST文件中所有Data Block的索引信息，Index Block中存储着若干条记录，每条记录代表一个Data Block的索引信息，一条索引信息包含以下三种数据</p>
+
+<ul>
+<li>该Data Block的Index Key，如果当前Block不是该SST文件中的最后一个Block，则Index Key需要满足的条件：<code>当前Block的Max Key &lt;= Index Key &lt; 下一个Block的Min Key</code>，如果当前Block是SST文件中最后一个Block则Index Key需要满足的条件：<code>当前Block的Max Key &lt;= Index Key</code>，Index Key由<code>FindShortestSeparator</code>和<code>FindShortSuccessor</code>两个方法计算出来，当然Index Key完全可以用每个Block的Max Key替代，之所以要计算是因为用户的Key可能太长，直接放到Index Block里面可能导致占据大量的空间，况且在LevelDB运行期间Index Block是会被加载到内存里</li>
+<li>该Data Block的起始位置在SST文件中的偏移量</li>
+<li>该Data Block的大小</li>
+</ul>
+
+<p><img src="https://i.imgur.com/gltSKi5.png" alt=""></p>
+
+<h4 id="toc_8">Footer</h4>
+
+<p>Footer可以理解为SST文件的<strong>入口</strong>，加载一个SST文件的时候先从Footer开始解析，为了方便解析Footer被设置成固定的48 Bytes大小，MagicNumber固定是8 Bytes，而MetaIndex Block Index和Index Block Index存储Block的位置信息是利用<code>紧凑型数字表示法</code>进行压缩存储的，所以大小并不固定，为了使Footer能够是固定的48 Bytes大小，这里引入了一个Padding，使三者大小加起来等于40 Bytes</p>
+
+<p>加载SST文件的时候先读取文件末尾的48 Bytes依次解析MetaIndex Block Index和Index Block Index，这样就能顺利获取到Filter Block和Index Block，而拥有了Index Block我们就知道了该SST文件中所有Data Block的位置和对应Index Key信息了</p>
+
+<p><img src="https://i.imgur.com/EnUtgMY.png" alt=""></p>
+
+<h3 id="toc_9">磁盘中的数据查询</h3>
+
+<p>LevelDB中数据是分层的，低Level的数据要比高Level要新，所以我们的查询顺序是Level 0 -&gt; Level 1 -&gt; ... -&gt; Level n，在查询Level 0层的时候，由于该层不同SST文件之间可能有overlap，我们要查询的Key可能存在于多个SST文件之中，我们先获取该层所有和查询Key有交集的SST文件，然后我们知道SST文件的序列号是单调递增的，序列号大的SST文件比序列号小的要新，所以我们对获取到的SST文件按照文件序列号由大到小进行排序，然后再依次进行查找，具体流程如下图</p>
+
+<p><img src="https://i.imgur.com/bhQm9Vx.png" alt=""></p>
+
+<p>我们要查询一个SST文件的时候LevelDB会先去Table Cache中查询这个SST文件是否已经被缓存，如果没有缓存的话，会打开这个SST文件然后读取Index Block和Filter Block等信息封装成一个TableAndFile对象缓存到Table Cache当中(查询的Key就是这个SST文件的序列号)，反之就会去Table Cache中查询这个Key可能存在于那个Data Block当中(如果开启了Bloom Filter则会先通过过滤器查询这个Key是否可能存在)，获取对应的Data Block再进行具体用户数据的查询，此外LevelDB还有一个Block Cache用于缓存Data Block(如果用户没有配置，则Block Cache的大小默认是8 MB)，在Block Cache查询数据利用一个cache_id和Data Block在SST文件中的offset信息拼接成一个16 Bytes的Key作为查询的索引Key，为的也是加快查询效率</p>
+
+<p>如果我们通过Binary search在Level n层中找到没有找到符合条件的Target SST File或者Target SST File中并没有符合我们要求的数据，那么我们会移动到Level n + 1层去进行查询，如果还是没有找到则再跳到更高层去进行查找，如果找到第一个条目的类型是kTypeDeletion或者找到最高层都没有找到符合要求的条目，那么就说明这个Key不存在，反之就返回对应的Value</p>
+
+<p>另外我们在<a href="https://axlgrep.github.io/tech/leveldb-compact.html">LevelDB的Compact</a>介绍过LevelDB内部会按照Seek触发Compact，也就是一个SST文件通过Seek特定的次数之后就可能要触发Compact，而这个计数就是由上面这个查询过程更改的，如果我们查询了一系列的sst文件，那么查询完毕之后我们会将第一个查询的sst文件对应的allowed_seeks值减一，如果改sst文件的allowed_seeks小于等于0了，则进行记录等待Compact</p>
+
+<h3 id="toc_10">总结</h3>
+
+<p>其实了解了LevelDB的版本控制还有SST文件结构之后再了解查询过程就不难了，为了加快查询效率LevelDB利用了Table Cache来缓存打开SST文件的Index Block和Filter Block信息，然后利用Block Cache来缓存Data Block的信息，这样在查询热Key的时候就无需从磁盘上反复的读取和解析，这实际上是用内存空间来换取时间的思想</p>
+
+<p>在内存使用量方面，Block Cache和Table Cache内部都是LRU的思想，Block Cache的内存占用还比较好控制，内部就是直接使用当前占用内存大小来作为LRU的限制，但是Table Cache的内存占用就不是那么精准了，因为其内部是使用的<strong>打开文件的个数</strong>作为限制的，比如说最多允许你打开2000个文件，如果超过了就把最旧的一个文件关闭，并且在Table Cache中删除它的相关信息(Index Block和Filter Block等)，所以Table Cache的内存占用量实际上还和SST文件的Index Block和Filter Block相关，这也给BlackWidow实现zset自定义比较器埋下了坑，不过这都是后话了，以后的博客会提到...</p>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+<script type="text/javascript">
+Prism.languages.cpp=Prism.languages.extend("c",{keyword:/\b(alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,"boolean":/\b(true|false)\b/,operator:/[-+]{1,2}|!=?|<{1,2}=?|>{1,2}=?|\->|:{1,2}|={1,2}|\^|~|%|&{1,2}|\|?\||\?|\*|\/|\b(and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/}),Prism.languages.insertBefore("cpp","keyword",{"class-name":{pattern:/(class\s+)[a-z0-9_]+/i,lookbehind:!0}});
+</script>
+
+
+</body>
+
+</html>
