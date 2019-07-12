@@ -5,7 +5,7 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>LevelDB的版本控制</title>
+<title>leveldb-version</title>
 
 
 <style type="text/css">
@@ -517,7 +517,7 @@ void VersionSet::AppendVersion(Version* v) {
 
 <p>实际上VersionSet内部的不同Version是作为环形双向的结点进行存储的，而dummy_versions_则是这个环形双向链表的表头，dummy_versions_.prev_指向VersionSet中最新的Version, 而dummy_versions_.next_指向最旧的Version，通过下面的插图可以了解到向VersionSet内部Append一个新的Version不过是在环形双向链表内部插入一个新的结点而已</p>
 
-<p><img src="https://i.imgur.com/br6l8Zy.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBVersion/version_figure_1.png" alt="Figure 1"></center></p>
 
 <p>Q: 随着数据的写入，LevelDB可能会触发Minor Compact(Immutable Memtable刷盘)和Major Compact(Level层sst文件和Level+1层sst文件的合并)，sst文件的变动必然会产生新的Version添加到VersionSet当中，这样内部维护的环形双向链表是否会存在大量的结点？</p>
 
@@ -527,7 +527,7 @@ void VersionSet::AppendVersion(Version* v) {
 
 <p>LevelDB用Version表示一个版本的元信息，用FileMetaData表示一个sst文件的元信息，每个Version内部需要记录当前版本对哪些sst文件持有了引用，而LevelDB中的sst文件又是分层存放的，所以Version内部使用了一个成员是FileMetaData指针的二维数组用以指向当前版本各层级所有sst的文件信息(一个sst文件可以由不同的Version引用，所以不同的Version内部可能指向同一个FileMetaData对象)</p>
 
-<p><img src="https://i.imgur.com/hlw40um.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBVersion/version_figure_2.png" alt="Figure 2"></center></p>
 
 <p>另外伴随着数据写入可能会触发Compact，各Level的sst文件数量可能会发生变化，这时候Version会计算出当前版本最适合Compact的level记录在自己的成员变量当中等待下一轮的Compact(LevelDB的版本控制和Compact联系异常紧密，后面会有一章博客专门讲Compact，这里就不过多展开</p>
 
@@ -573,11 +573,11 @@ void VersionSet::AppendVersion(Version* v) {
 
 <p>在进行Minor Compact或者Marjor Compact的时候产生一个VersionEdit，Version N和一个VersionEdit通过Builder就能产生一个全新的Version N+1</p>
 
-<p><img src="https://i.imgur.com/FcUHx9G.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBVersion/version_figure_3.png" alt="Figure 3"></center></p>
 
 <p>在启动DB的时候，LevelDB会从Manifest文件中进行恢复，而Manifest中存储着生成Manifest文件时候Version的快照信息以及后续通过Compact产生的多个VersionEdit信息，Version 1和多个VersionEdit通过Builder就能产生一个全新的Version 2</p>
 
-<p><img src="https://i.imgur.com/06jsLsl.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBVersion/version_figure_4.png" alt="Figure 4"></center></p>
 
 <h3 id="toc_7">Version持久化</h3>
 
@@ -585,7 +585,7 @@ void VersionSet::AppendVersion(Version* v) {
 
 <p>下图是LevelDB运行期间, 各版本Version与Manifest中VersionEdit记录的关系, 在重新打开DB时从Manifest中读取Version SnapShot, 然后读取后面的所有VersionEdit记录并且依次作用于VersionSet::Builder, 最后通过SaveTo()方法即可以生成新的Version, 然后将其挂到VersionSet当中, 这时候DB启动就成功了</p>
 
-<p><img src="https://i.imgur.com/aQ8FFYA.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBVersion/version_figure_5.png" alt="Figure 5"></center></p>
 
 <h3 id="toc_8">总结</h3>
 

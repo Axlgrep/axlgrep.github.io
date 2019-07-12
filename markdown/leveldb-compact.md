@@ -13,7 +13,7 @@ LevelDB中的Compact可以分为Minor Compact和Major Compact，下面会一一�
 ### Minor Compact
 前面的博客提到过，向LevelDB中写数据，首先是写入内存中的Memtable，然后Memtable在一定的条件下(实际上就是Memtable的体积达到了用户设置的write\_buffer\_size大小)就会转换成Immutable Memtable，而Immutable Memtable就会等待被刷盘， 所以Minor Compact的本质就是将内存数据库中所有数据持久化到一个磁盘文件中
 
-![](https://i.imgur.com/1aZnHwp.png)
+<center>![Figure 1](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_1.png)</center>
 
 Minor Compact的流程实际上很简单，创建一个迭代器用于迭代Immutable Memtable，在遍历的过程中将获取到的数据写入到一个sst文件当中，这个过程完毕之后将新生成的sst文件放入到Level 0当中， 然后将Immutable Memtable置空， 需要注意的是由于Level 0中的sst文件是由内存中的数据直接生成，所以该层不同的sst文件之间可能有overlap，正是由于有此特性，所以不管是数据查询还是Major Compact对Level 0层都会进行特殊处理
 
@@ -27,8 +27,7 @@ A: 问题是存在的，这种情况下我们只能阻塞等待，也就是常�
 ### Major Compact
 如果说Minor Compact的作用是将内存中的数据原封不动的刷到磁盘中然后腾出内存中的空间容纳新的数据，那么Major Compact的作用实际上就是经可能的清理掉无效的数据来缓解读放大和空间放大的问题，Major Compact是作用于相邻Level之间的，在Level层选出待Compact的连续一段区间的sst文件，然后在Level + 1层选出可以完全覆盖Level待Compact的那段区间，接着就是将这些sst文件中的所有条目做一次归并遍历然后将有效的数据输出到新的sst文件当中，最后将新生成的sst文件放入Level + 1层合适的位置中，然后将参与Compact的那些旧sst文件删除即可 (这个过程是比较复杂的，并且LevelDB做了一系列优化操作， 下面会细说)
 
-![](https://i.imgur.com/Cggny8O.png)
-
+<center>![Figure 2](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_2.png)</center>
 
 #### 触发时机
 
@@ -50,7 +49,7 @@ A: 问题是存在的，这种情况下我们只能阻塞等待，也就是常�
 2. 在Level + 1层找到和[smallest, largest]有overlap的sst文件放入到input[1]集合当中（Level + 1层被橘色框括住的sst文件）
 3. 最后根据input[0]和input[1]集合中sst文件覆盖的总区间(这里我们将这个区间称为[all\_start， all\_end])，在不扩大input[1]输入文件的前提下，查找Level层中与[all\_start, all\_end]有overlap的sst文件构成input[0]中最终的文件(被红色框扩住的sst文件就是最后计算出来参与这次Compact的文件)
 
-![](https://i.imgur.com/IKXKnWi.png)
+<center>![Figure 3](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_3.png)</center>
 
 ##### 多路合并
 1. 先计算出一个smallest\_snapshot(我们知道LevelDB的快照本质上就是一个序列号，而DB每条记录也有一个对应的序列号，我们可以根据这个序列号来判断记录是否可以被合法删除)
@@ -75,13 +74,17 @@ A: 问题是存在的，这种情况下我们只能阻塞等待，也就是常�
         drop = true;
       }
 ```
-![](https://i.imgur.com/tr1lX6n.png)
+
+<center>![Figure 4](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_4.png)</center>
+
 前面介绍过在LevelDB当中如果多条记录具有相同的Key，那么排列在最前面的那个条目序列号一定是最大的，并且存储的数据也是最新的，而排列在后面的那些则是旧数据，理论上是可以被删除的，但是前提是这个条目没有被快照引用，在上面的插图中Seq=20的那条记录是最新的，但由于在Seq=15处打了一个快照，所以只有被紫色矩形括住的条目在可以被drop掉
 
-![](https://i.imgur.com/PAkqG0Q.png)
+<center>![Figure 5](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_5.png)</center>
+
 再考虑另外一种场景，和上面一样有一系列Key相同的条目排列在一起，但是队头的条目是带有删除标记的，这就意味着对应Key是已经被删除的，在没有快照限制的场景下紫色矩形括住的条目实际上都是可以被drop掉的，但是当我们在删除带有kTypeDeletion标记的条目的时候要保证在[level_ + 2， kNumLevels]层这个Key一定没有出现过，否则高Level的对应Key的旧数据可能会变成新数据
 
-![](https://i.imgur.com/5hjmHD3.png)
+<center>![Figure 6](../assets/img/ImgurAlbumLevelDBCompact/compact_figure_6.png)</center>
+
 经历过多路合并之后Level i和Level i+1层的sst文件中的有效条目被合并会生成新的sst文件，我们需要将新生成的sst文件放入Level i+i层中合适的位置，然后将之前参与Compact的sst文件删除
 
 ##### 重新计算积分
@@ -95,4 +98,4 @@ A: 问题是存在的，这种情况下我们只能阻塞等待，也就是常�
 我们会在新的Version中记录最高的积分以及对应的层数，如果记录的积分大于等于1，则我们会在下次对对应的Level进行Compact操作
 
 ### 总结
-Compact我认为是Leveldb最复杂的过程之一，同时也是Leveldb的性能瓶颈之一(compact过程伴随着文件的增删，占据磁盘IO，如果Compact速度过慢导致Level 0层sst文件堆积，可能会触发Leveldb的缓写甚至阻写的机制)，但是在执行Compact的期间对Leveldb的可用性不会造成影响，在Compact的过程中虽然会生成新的sst文件，但是旧的sst文件是不会被删除的，这意味着它依然是可读的，只有在Compact结束的时候会将sst文件的改动应用到新的Version上，这时候如果没有快照引用旧sst文件，那么这些旧的sst文件就可以被安全的删除了
+Compact我认为是Leveldb最复杂的过程之一，同时也是Leveldb的性能瓶颈之一(compact过程伴随着文件的增删，占据磁盘IO，如果Compact速度过慢导致Level 0层sst文件堆积，可能会触发Leveldb的缓写甚至阻写的机制)，但是在执行Compact的期间对Leveldb的可用性不会造成影响，在Compact的过程中虽然会生成新的sst文件，但是旧的sst文件是不会被删除的，这意味着它依然是可读的，只有在Compact结束的时候会将sst文件的改动应用到新的Version上，这时候如果没有快照引用旧sst文件，那么这些旧的sst文件就可以被安全的删除了.

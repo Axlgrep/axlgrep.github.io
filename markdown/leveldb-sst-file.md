@@ -1,11 +1,8 @@
 ## **LevelDB的SST File**
-
 ### 介绍
-
 LevelDB作为一个数据存储引擎，存储的数据大部分是在磁盘上的，而磁盘上数据的表现形式就是文件，也就是本章要介绍的SST文件，SSTable 是 Sorted String Table 的简称，SST的生成时机有两个，一是内存中的Immutable Memtable Flush到磁盘上会生成SST文件，二是在Compaction的时候相邻层级的SST文件合并生成新的SST文件，而这两者都是通过TableBuilder来生成SST文件的，本片将会介绍SST文件的生成过程以及文件结构
 
 ### SST文件结构
-
 我们先看一下SST文件的整体结构，实际上SST文件是由一系列的Block和末尾的一个Footer组成的，而Block又分为Data Block(用于存储用户实际数据的), Filter Block(实际上就是一个过滤器，可以快速的判断一个Key是否在某个Data Block当中), MetaIndex Block(用于存储一些Meta信息，目前存储的是Filter的名称，以及Filter Block的起始位置和Size)，最后就是Index Block(存储了该SST文件中每个Data Block的索引Key和Block的起始位置还有Size)
 
 ```cpp
@@ -71,7 +68,6 @@ LevelDB作为一个数据存储引擎，存储的数据大部分是在磁盘上�
 ```
 
 ### BlockBuilder
-
 通过上面的介绍，我们了解到实际上SST文件大部分是由一个个的Block构成的，而在LevelDB中将数据转换成文件里面的Block就是由BlockBuilder来完成的了， 下面我们先来看一下BlockBuilder的定义.
 
 ```cpp
@@ -248,7 +244,6 @@ Slice BlockBuilder::Finish() {
 ```
 
 ### TableBuilder
-
 文章开头有提到过，LevelDB的SST文件是由TableBuilder生成的，而TableBuilder内部实际上是持有了BlockBuilder(用于写data\_block以及index\_block)和FilterBlockBuilder(用于写filter\_block)，外界通过调用TableBuilder的Add()方法，向TableBuilder的data\_block中添加数据，并且在必要的时候更新Index\_block以及filter_block中的内容
 
 从下面列出的TableBuilder::Add()方法可以看出，每当写完一个data\_block并且刷盘之后，都会计算出这个data\_block的索引key出来，并且将这个索引key以及这个data\_block在SST文件中的offset和size信息添加到index_block当中，后续查找数据我们就可以通过这个index_block快速的定位到我们需要查找的key可能当前SST文件的哪个Block当中了
@@ -348,5 +343,4 @@ void Footer::EncodeTo(std::string* dst) const {
 ```
 
 ### 总结
-
 通过上述介绍，不难发现SST文件的创建过程是非常快速的，因为新添加的数据首先都是先存入一个Block里，然后依次向文件末尾追加Block，是一个顺序写的过程，但是如果是在LevelDB中的sst文件中查找一个key速度就没那么快了，首先要通过Index Block来查找Key可能在哪个Data Block中，然后再在Data Block中进行查找，另外LevelDB的sst文件是有层级结构的，Level0层的sst文件由于是不同时刻的Immutable Memtable直接Flush而成，所以文件和文件之间可能存在overlap，如果需要在Level0层的sst文件中查找某一个Key的数据，可能需要查找这一层的所有sst文件才能确定结果，不过对此LevelDB也引入了一系列策略来提高查询效率，比如布隆过滤器.

@@ -5,7 +5,7 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>LevelDB写入与删除记录</title>
+<title>leveldb-write-data-process</title>
 
 
 <style type="text/css">
@@ -724,7 +724,7 @@ Status DBImpl::MakeRoomForWrite(bool force) {
 
 <h3 id="toc_6">总结</h3>
 
-<p>通过梳理数据写入流程我们会发现LevelDB每一个操作(不管是写入还是删除)都有一个序列号，这个序列号是递增的，序列号越大表示该操作越新，再深入学习LevelDB代码后会发现，其快照的概念也是基于这个序列号实现的.</p>
+<p>通过梳理数据写入流程我们会发现LevelDB每一个操作(不管是写入还是删除)都有一个序列号，这个序列号是递增的，序列号越大表示该操作越新，再深入学习LevelDB代码后会发现，其快照的概念也是基于这个序列号实现的.</p>
 
 
 

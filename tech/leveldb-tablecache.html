@@ -478,7 +478,7 @@ pre[class*="language-"] {
 
 <p>上面提到了，TableCache用于缓存已经打开的sst文件以及对应的Index Block，方便快速的对SST文件进行访问，我们知道每个SST文件都有自己独立的编号，所以这个编号自然而然的成为了我们在TableCache中查找对应SST文件信息的key，而value的内容包括指向一个RandomAccessFile的指针以及指向Table的指针(这value中的这两个对象在堆上进行分配，我们在清除value的时候需要手动释放空间)，而Table中存有了对应sst文件的整个Index Block内容，可见还是会占据一定量的内存空间，下面是Table Cache key/value的结构图.</p>
 
-<p><img src="https://i.imgur.com/Ah3sy91.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_1.png" alt="Figure 1"></center></p>
 
 <h3 id="toc_3">TableCache的创建</h3>
 
@@ -535,7 +535,7 @@ pre[class*="language-"] {
 
 <p>下面是ShardedLRUCache的结构，实际上就是由一个LRUCache的数组构成.</p>
 
-<p><img src="https://i.imgur.com/S9d8lYa.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_2.png" alt="Figure 2"></center></p>
 
 <h3 id="toc_5">LRUHandle</h3>
 
@@ -571,7 +571,7 @@ pre[class*="language-"] {
 
 <p>下面先给出LRUCache的结构图，我们可以发现LRUCache实际上是由三大组件构成，HandleTable(HandleTable的作用是存储实际的数据，内部实际上是一个数组，数组的元素是指向一个LRUHandle的单链表的表头元素，当需要向Handle Table中插入数据的时候，先根据用户数据的key计算出一个hash值，然后根据这个hash值确定数据应该存储在HandleTable中的哪一条单链表上)，lru_和in_use_两者的结构是完全相同的都是环形双链表，lru_里存储的是之前被使用过，但是当前外界没有引用的LRUHandle对象，而in_use_中存储的是目前外界正在使用的LRUHandle对象，所以在HandleTable中存储的LRUHandle对象要么在lru_要么在in_use_中</p>
 
-<p><img src="https://i.imgur.com/xuRLWKN.png" alt=""></p>
+<p><center><img src="../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_3.png" alt="Figure 3"></center></p>
 
 <h3 id="toc_7">LRUCache::Insert</h3>
 
