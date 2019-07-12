@@ -33,17 +33,17 @@ LevelDB作为一个非常高效的kv数据库，得益于其使用了LSM Tree的
 TwoLevelIterator内部维护了index\_iter\_和data\_iter\_两个迭代器，我们可以将index\_iter\_理解为一级索引，负责key到data\_iter\_的映射，而data\_iter\_才是真正指向用户数据的，两者协同合作可以快速定位数据，并且不同类型的index\_iter_和data\_iter\_组合也能形成不同的TwoLevelIterator以应付各种场景，下面我们会分别介绍
 
 1.	用于遍历某一个sst文件的TwoLevelIterator, 我们暂且称为TableIterator, index\_iter\_对sst文件中Index Block中的内容进行遍历，并且驱动data\_iter\_指向新的Data Block，从而遍历整个sst文件的用户数据(创建TableIterator的时候会先去[LevelDB的TableCache](https://axlgrep.github.io/tech/leveldb-tablecache.html)中查找对应的sst文件是否已经打开并且将Index Block的内容缓存在Table Cache中)
-<center>![Figure 1](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_1.png)</center>
+![Figure 1](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_1.png)
 
 
 2. 用于遍历除Level 0以外其他Level的所有sst文件的TwoLevelIterator, 我们暂且成为ConcatenatingIterator，index\_iter\_对这一层各个sst文件进行遍历，遍历到某一个sst文件的时候实际类型为TableIterator的data\_iter\_便指向它对其中用户数据进行遍历
-<center>![Figure 2](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_2.png)</center>
+![Figure 2](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_2.png)
 
 
 #### MergingIterator
 MergingIterator最典型的使用场景是需要对整个DB的数据进行有序遍历的时候，我们知道这时候有的数据在Memtable/Immutable Memtable中，需要Memtable Iterator遍历其中的数据，其他存在磁盘上的数据需要使用TableIterator和ConcatenatingIterator来进行遍历，而MergingIterator实际上就是将这些不同的Iterator管理起来，通过归并的方式使这些存放在不同位置的数据可以整体有序的返回给使用者
 
-<center>![Figure 3](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_3.png)</center>
+![Figure 3](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_3.png)
 
 上面就是一个典型MergingIterator结构图，看了下面一段代码之后MergingIterator就能够了解其主要思想，如果是正向遍历则所有的迭代器都先SeekToFirst()一下，然后将这些这些迭代器中指向最小key的那个迭代器作为基准迭代器返回数据，下一次Next的时候只有这个基准迭代器调用Next()方法，然后再调用FindSmallest找出新的基准迭代器返回数据，这样就能让所有的这些迭代器所指向的数据整体有序返回了
 
@@ -322,7 +322,7 @@ Prev()的过程和Next()稍有不同，由于是从后向前遍历，MergingIter
 
 从下图可以看出MergingIterator向前遍历找到第一条不是Key2的record并且指向它，并且saved\_key\_和saved\_value\_指向Key2的有效用户数据用于返回
 
-<center>![Figure 4](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_4.png)</center>
+![Figure 4](../assets/img/ImgurAlbumLevelDBIterator/iterator_figure_4.png)
 
 ### 总结
 正是由于LevelDB各个组件用不同的格式将数据进行存储，所以在获取不同位置的数据时候需要针对其特定的格式进行解析，如果在获取数据的时候都对去关心所有的存储格式，无疑代码可读性会很差，正是由于如此LevelDB的Iterator用确定的特定接口将上层需求和下层实现解耦合，用于遍历特定位置的迭代器只需要继承Iterator，然后根据自己访问数据的特定格式对Iterator定义的几个接口进行实现即可

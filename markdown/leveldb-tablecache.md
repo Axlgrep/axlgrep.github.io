@@ -7,7 +7,7 @@
 ### TableCache缓存的数据
 上面提到了，TableCache用于缓存已经打开的sst文件以及对应的Index Block，方便快速的对SST文件进行访问，我们知道每个SST文件都有自己独立的编号，所以这个编号自然而然的成为了我们在TableCache中查找对应SST文件信息的key，而value的内容包括指向一个RandomAccessFile的指针以及指向Table的指针(这value中的这两个对象在堆上进行分配，我们在清除value的时候需要手动释放空间)，而Table中存有了对应sst文件的整个Index Block内容，可见还是会占据一定量的内存空间，下面是Table Cache key/value的结构图.
 
-<center>![Figure 1](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_1.png)</center>
+![Figure 1](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_1.png)
 
 
 ### TableCache的创建
@@ -68,7 +68,7 @@ Cache* NewLRUCache(size_t capacity) {
 ```
 下面是ShardedLRUCache的结构，实际上就是由一个LRUCache的数组构成.
 
-<center>![Figure 2](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_2.png)</center>
+![Figure 2](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_2.png)
 
 ### LRUHandle
 在看LRUCache之前我们先来了解一下LRUCache内部缓存的对象LRUHandle, 由于LRUCache缓存数据需要记录一些额外的信息，所以LevelDB将用户要缓存的key/value加上一些缓存必须的额外信息封装成了一个LRUHandle对象，例如deleter(由于value指针指向的内容大都是用户自己在堆上进行分配的，所以在LRUCache抛弃某些数据的时候需要有一个回调来释放value指向的对象)，next\_hash(用于HandleTable，指向下一个LRUHandle对象), next和prev(用于lru\_或者in\_use\_环形双向链表)，charge(可以理解为当前LRUHandle所占据的空间，如果当前LRUCache所有LRUHandle charge的和已经大于capacity\_的值了，那就需要对那些老旧的LRUHandle对象进行清理了)
@@ -104,7 +104,7 @@ LRUCache实际上Least Recently Used Cache的缩写，实际上就是最近最�
 
 下面先给出LRUCache的结构图，我们可以发现LRUCache实际上是由三大组件构成，HandleTable(HandleTable的作用是存储实际的数据，内部实际上是一个数组，数组的元素是指向一个LRUHandle的单链表的表头元素，当需要向Handle Table中插入数据的时候，先根据用户数据的key计算出一个hash值，然后根据这个hash值确定数据应该存储在HandleTable中的哪一条单链表上)，lru\_和in\_use\_两者的结构是完全相同的都是环形双链表，lru\_里存储的是之前被使用过，但是当前外界没有引用的LRUHandle对象，而in\_use\_中存储的是目前外界正在使用的LRUHandle对象，所以在HandleTable中存储的LRUHandle对象要么在lru\_要么在in\_use\_中
 
-<center>![Figure 3](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_3.png)</center>
+![Figure 3](../assets/img/ImgurAlbumLevelDBTableCache/tablecache_figure_3.png)
 
 
 
@@ -265,6 +265,3 @@ Cache::Handle* LRUCache::Insert(
 
 ### 总结
 TableCache引入主要是为了能够快速的访问sst文件中的数据，其中存储的是打开sst文件的句柄，以及其中的Index Block，如果我们需要访问一个sst文件，而其数据正好在TableCache当中，我们就不需要重新打开文件，并且将Index Block中的数据从磁盘读取并且解析到内存当中了，效率是有比较大的提升的，但是如果缓存的sst文件信息过多，Index Block占据的内存空间也是不容小觑的，好在我们可以通过options\_.max\_open\_files来控制LevelDB打开sst文件的上限，从而对其占用的内存做出一定的限制，实际上就是时间换空间或者空间换时间的思想，在使用过程中需要自己做出权衡.
-
-
- 

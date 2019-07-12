@@ -6,7 +6,7 @@ Pika是支持主从结构的，通过主库向从库传递Binlog来实现数据�
 ### 怀疑是我们自己实现的线程池有问题？
 原先的Pika采用同步处理请求的方式(在Epoll线程里面既处理收发Buffer的事件也处理写DB和写Binlog的事件)，挂在同一个Epoll线程上客户端的请求被顺序的执行，在这种实现下如果前面的客户端执行了重操作可能会阻塞后面客户端的请求造成延迟过高，所以我们对Pika的网络层进行了改造，添加了一个线程池来异步的处理客户端请求(将读写Buffer和写DB写Binlog进行了分离，在Epoll线程里读取Buffer，然后转换成命令封装成Task扔到线程池中执行，等任务执行完毕之后再通知Epoll线程将Reply写回给客户端)
 
-<center>![Figure 1](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_1.png)</center>
+![Figure 1](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_1.png)
 
 上面是我们自己实现的线程池，可以看出Epoll线程和线程池中的工作线程操作全局任务队列都需要首先获取独占锁，如果在有大量任务密集型的场景下，这种方式的锁冲突严重，将导致大量操作系统的上下文切换，于是我将Pika内部的线程池由一个变成两个，并且每个线程池中的线程都变成原先的一半(为了尽量保持和之前单线程池一样的线程数量)，然后开始新的压测，但是发现CPU使用率和单线程池版本一样，并没有太大的改善，这说明目前线程池还不是Pika当前性能瓶颈，但是自己却对线程池的优化有了一些想法
 
@@ -18,7 +18,7 @@ Pika是支持主从结构的，通过主库向从库传递Binlog来实现数据�
 
 为了解决全局任务队列锁冲突的问题，OCeanBase实现了LightyQueue，其主要思想是先固定全局任务队列的大小，然后将任务队列中每一个位置看成一个槽，为每个槽都分配自己的锁，然后让工作线程在当前为其分配的槽上获取Task，通过这样的方式，可以让每个工作线程在不同的槽位上等待，避免了全局锁的冲突
 
-<center>![Figure 2](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_2.png)</center>
+![Figure 2](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_2.png)
 
 假设线程池中有三个工作线程thread 0，thread 1和thread 2，全局任务队列中共有十个槽位，然后还有两个变量，一个是next\_push\_task\_index指向下一个空闲待插入任务的槽位，另一个是next\_pop\_task\_index指向下一个待消费任务的槽位，首先thread 0, thread 1和thread 2分别等待slot 0， slot 1和slot 2, Epoll线程将任务加入slot 0时唤醒thread 0, 加入slot 1时唤醒thread 1，加入slot 2时唤醒thread 2，接着，thread 1很快将任务处理完毕之后等待slot 3, thread 0等待slot 4，thread 2等待slot 5，Epoll线程将任务加到slot 3时将thread 1唤醒...
 
@@ -70,7 +70,7 @@ sudo FlameGraph/flamegraph.pl perf.folded > perf.svg
 #### 分析
 从下面火焰图可以看出Pika占用CPU实际上分为两大类，一类是pink::WorkerThread主要是用于处理网络事件，读写Buffer，另外一类是pink::ThreadPool，在这里面主要处理写DB和写Binlog等操作，可以看出来在pink::WorkerThread内部CPU使用都是饱和的没有什么异常， 但是在pink::ThreadPool中PikaClientConn::DoCmd和Cmd::ProcessSinglePartitionCmd内部存在着大量的lock\_wait以及unlock\_wake占据着CPU，于是我们可以得出在这个两个方法内部可能还存在着一些全局的独占锁，这时候我们去这两个方法里面查找就能很快的发现问题了，其实不仅是写Binlog占据了独占锁，Pika还需要统计慢日志以及QPS等信息，改变这些数据都是需要上独占锁的，这也是为什么CPU跑不满的原因(通过测试，发现多个线程之间抢占读锁开销也不小)
 
-<center>![Figure 3](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_3.png)</center>
+![Figure 3](../assets/img/ImgurAlbumPikaFlameFigure/flame_figure_figure_3.png)
 
 ### 总结
 如果以后再遇到了性能问题，比如性能回退，可以通过在新老两个版本中画火焰图来进行对比测试，这样能很快的发现是自己哪一次改动导致的性能问题，另外Pika的线程数并不是配置的越多越好，要根据核心数来进行配置， 如果配置线程数过多可能导致系统频繁的上下文切换(查看系统上下文切换可以使用vmstat 1)，上下文切换次数过多表示你CPU大部分时间都在浪费在上下文切换，导致CPU干正经事的时间少了，这是不可取的

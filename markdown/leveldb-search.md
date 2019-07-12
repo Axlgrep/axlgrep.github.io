@@ -20,19 +20,19 @@
 
 假设用户依次执行了三个操作`PUT("tag", "ooo")`，`PUT("tag", "xxx")`，`DELETE("tag")`三个操作，LevelDB为这三个操作分配的SequenceNumber分别为92，93，94，当前DB中tag这个Key实际上已经是被删除了的，但是我们如果以92为SnapShot去DB中进行查询的话，那么我们会得到它的Value为`"ooo"`
 
-<center>![Figure 1](../assets/img/ImgurAlbumLevelDBSearch/search_figure_1.png)</center>
+![Figure 1](../assets/img/ImgurAlbumLevelDBSearch/search_figure_1.png)
 
 ### 查询流程
 LevelDB数据的写入是先写到Memtable当中，当Memtable的体积达到了用户设置的write-buffer-size之后Memtable便转换成了Immutable Memtable等待刷盘，后台线程将Immutable Memtable先Flush到Level 0层上(如果新生成的SST文件和Level 0层的其他SST文件没有overlap，那么为了避免Level 0层堆积太多SST文件降低查询效率，会直接把新生成的SST文件Flush到Level 1层上)，然后随着数据的增多LevelDB内部会在相邻的Level之间触发Major Compact，低Level的数据会经过清理合并到高Level当中.
 
 所以我们Memtable中的数据是最新的，其次是Immutable Memtable, 最后是磁盘上的各Level的SST文件(低Level的SST文件比高Level的SST文件要新，Level 0层的SST文件有overlap，在该层中序列号大的SST文件比序列号小的SST文件要新)，所以我们是先在Memtable和Immutable Memtable中查询，若内存中没有命中我们就去磁盘进行查找，内存中的查找流程还比较简单，就是在SkipList中查询数据，就不做过多的介绍了，本篇博客着重介绍如何在磁盘中的SST文件中查找数据.
 
-<center>![Figure 2](../assets/img/ImgurAlbumLevelDBSearch/search_figure_2.png)</center>
+![Figure 2](../assets/img/ImgurAlbumLevelDBSearch/search_figure_2.png)
 
 ### SST文件
 在了解如何从磁盘上查询数据之前先看一下SST文件的整体结构，SST文件中Data Block中存储着用户的数据，其他Block存储着当前SST文件的一些元信息方便快速的查询数据，当LevelDB读取一个SST文件时先会读取文件末尾的Footer，Footer中存储着Index Block和MetaIndex Block在文件中的偏移量以及大小信息，Index Block中记录了每个Data Block的索引Key以及对应Block的位置信息，而在MetaIndex Block中目前LevelDB只记录了Filter Block的位置信息，Filter Block的作用就是快速的判断一个Key是否可能存在于一个Data Block当中，由于实现原因，它只能确认一个key一定不存在，但是不能确认一个key一定存在，但是这也一定程度上提高了查询效率
 
-<center>![Figure 3](../assets/img/ImgurAlbumLevelDBSearch/search_figure_3.png)</center>
+![Figure 3](../assets/img/ImgurAlbumLevelDBSearch/search_figure_3.png)
 
 #### Filter Block
 FilterBlockBuilder是构造Filter Block的组件，实现还比较简单，内部维护了一个result\_字符串用于存储所有Filter，filter\_offsets\_记录各个Filter在result\_中的位置，在写一个Data Block的时候将Key追加到自身keys\_字符串的末尾，并且用start\_数组记录每个Key的起始位置，在Data Block写完之后就可以根据keys\_和start\_得到tmp\_keys\_，然后根据用户配置的bits\_per\_key以及tmp\_keys\_的大小分配一个Filter字符串，根据tmp\_keys\_中key计算出来的hash值将Filter中特定的bits值设置为1，最后把Filter追加到result\_的末尾并且在filter\_offsets\_中记录新Filter的位置信息
@@ -58,7 +58,7 @@ FilterBlockBuilder是构造Filter Block的组件，实现还比较简单，内�
 
 下图就是FilterBlock内部的存储结构，橘黄色的部分记录的是result\_的内容，是由一系列的Filter字符串构成，绿色部分存储的是filter\_offsets\_中记录的Filter字符串的位置信息，粉色部分存储的是filter\_offsets\_的大小
 
-<center>![Figure 4](../assets/img/ImgurAlbumLevelDBSearch/search_figure_4.png)</center>
+![Figure 4](../assets/img/ImgurAlbumLevelDBSearch/search_figure_4.png)
 
 为了例子足够简单，我们假设一个Data Block只有三个Key：`Key1`，`Key2`，`Key3`，为此我们分配了一个大小为15 bits的Filter，经过特定的Hash计算Key1，发现需要在Filter的第1，7和11 bits上置1，Key2需要在第2，8，11 bits上置1，Key3需要在4，13 bits上置1，最终该Data Block的Filter如上图所示
 
@@ -74,19 +74,19 @@ Index Block用于存储该SST文件中所有Data Block的索引信息，Index Bl
 * 该Data Block的起始位置在SST文件中的偏移量
 * 该Data Block的大小
 
-<center>![Figure 5](../assets/img/ImgurAlbumLevelDBSearch/search_figure_5.png)</center>
+![Figure 5](../assets/img/ImgurAlbumLevelDBSearch/search_figure_5.png)
 
 #### Footer
 Footer可以理解为SST文件的**入口**，加载一个SST文件的时候先从Footer开始解析，为了方便解析Footer被设置成固定的48 Bytes大小，MagicNumber固定是8 Bytes，而MetaIndex Block Index和Index Block Index存储Block的位置信息是利用`紧凑型数字表示法`进行压缩存储的，所以大小并不固定，为了使Footer能够是固定的48 Bytes大小，这里引入了一个Padding，使三者大小加起来等于40 Bytes
 
 加载SST文件的时候先读取文件末尾的48 Bytes依次解析MetaIndex Block Index和Index Block Index，这样就能顺利获取到Filter Block和Index Block，而拥有了Index Block我们就知道了该SST文件中所有Data Block的位置和对应Index Key信息了
 
-<center>![Figure 6](../assets/img/ImgurAlbumLevelDBSearch/search_figure_6.png)</center>
+![Figure 6](../assets/img/ImgurAlbumLevelDBSearch/search_figure_6.png)
 
 ### 磁盘中的数据查询
 LevelDB中数据是分层的，低Level的数据要比高Level要新，所以我们的查询顺序是Level 0 -> Level 1 -> ... -> Level n，在查询Level 0层的时候，由于该层不同SST文件之间可能有overlap，我们要查询的Key可能存在于多个SST文件之中，我们先获取该层所有和查询Key有交集的SST文件，然后我们知道SST文件的序列号是单调递增的，序列号大的SST文件比序列号小的要新，所以我们对获取到的SST文件按照文件序列号由大到小进行排序，然后再依次进行查找，具体流程如下图
 
-<center>![Figure 7](../assets/img/ImgurAlbumLevelDBSearch/search_figure_7.png)</center>
+![Figure 7](../assets/img/ImgurAlbumLevelDBSearch/search_figure_7.png)
 
 我们要查询一个SST文件的时候LevelDB会先去Table Cache中查询这个SST文件是否已经被缓存，如果没有缓存的话，会打开这个SST文件然后读取Index Block和Filter Block等信息封装成一个TableAndFile对象缓存到Table Cache当中(查询的Key就是这个SST文件的序列号)，反之就会去Table Cache中查询这个Key可能存在于那个Data Block当中(如果开启了Bloom Filter则会先通过过滤器查询这个Key是否可能存在)，获取对应的Data Block再进行具体用户数据的查询，此外LevelDB还有一个Block Cache用于缓存Data Block(如果用户没有配置，则Block Cache的大小默认是8 MB)，在Block Cache查询数据利用一个cache\_id和Data Block在SST文件中的offset信息拼接成一个16 Bytes的Key作为查询的索引Key，为的也是加快查询效率
 

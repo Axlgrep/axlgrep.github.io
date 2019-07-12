@@ -47,7 +47,7 @@ void VersionSet::AppendVersion(Version* v) {
 ```
 实际上VersionSet内部的不同Version是作为环形双向的结点进行存储的，而dummy\_versions\_则是这个环形双向链表的表头，dummy\_versions\_.prev_指向VersionSet中最新的Version, 而dummy\_versions\_.next\_指向最旧的Version，通过下面的插图可以了解到向VersionSet内部Append一个新的Version不过是在环形双向链表内部插入一个新的结点而已
 
-<center>![Figure 1](../assets/img/ImgurAlbumLevelDBVersion/version_figure_1.png)</center>
+![Figure 1](../assets/img/ImgurAlbumLevelDBVersion/version_figure_1.png)
 
 Q: 随着数据的写入，LevelDB可能会触发Minor Compact(Immutable Memtable刷盘)和Major Compact(Level层sst文件和Level+1层sst文件的合并)，sst文件的变动必然会产生新的Version添加到VersionSet当中，这样内部维护的环形双向链表是否会存在大量的结点？
 
@@ -57,7 +57,7 @@ A: 其实不用担心这个问题，每个Version内部会记录外界对其的�
 ### Version
 LevelDB用Version表示一个版本的元信息，用FileMetaData表示一个sst文件的元信息，每个Version内部需要记录当前版本对哪些sst文件持有了引用，而LevelDB中的sst文件又是分层存放的，所以Version内部使用了一个成员是FileMetaData指针的二维数组用以指向当前版本各层级所有sst的文件信息(一个sst文件可以由不同的Version引用，所以不同的Version内部可能指向同一个FileMetaData对象)
 
-<center>![Figure 2](../assets/img/ImgurAlbumLevelDBVersion/version_figure_2.png)</center>
+![Figure 2](../assets/img/ImgurAlbumLevelDBVersion/version_figure_2.png)
 
 另外伴随着数据写入可能会触发Compact，各Level的sst文件数量可能会发生变化，这时候Version会计算出当前版本最适合Compact的level记录在自己的成员变量当中等待下一轮的Compact(LevelDB的版本控制和Compact联系异常紧密，后面会有一章博客专门讲Compact，这里就不过多展开
 
@@ -106,18 +106,18 @@ class VersionEdit {
 在进行Minor Compact或者Marjor Compact的时候产生一个VersionEdit，Version N和一个VersionEdit通过Builder就能产生一个全新的Version N+1
 
 
-<center>![Figure 3](../assets/img/ImgurAlbumLevelDBVersion/version_figure_3.png)</center>
+![Figure 3](../assets/img/ImgurAlbumLevelDBVersion/version_figure_3.png)
 
 在启动DB的时候，LevelDB会从Manifest文件中进行恢复，而Manifest中存储着生成Manifest文件时候Version的快照信息以及后续通过Compact产生的多个VersionEdit信息，Version 1和多个VersionEdit通过Builder就能产生一个全新的Version 2
 
-<center>![Figure 4](../assets/img/ImgurAlbumLevelDBVersion/version_figure_4.png)</center>
+![Figure 4](../assets/img/ImgurAlbumLevelDBVersion/version_figure_4.png)
 
 ### Version持久化
 在LevelDB运行期间, 随着数据的写入以及读取可能会触发Compact造成sst文件的增加以及删除, 从而生成新的Version(上面提到过，通过旧的Version以及VersionEdit生成), 为了下次启动DB可以恢复到正确的状态， LevelDB在生成新Version之前，会把作用于这个Version的VersionEdit追加写到Manifest文件末尾，以便下次启动DB的时候从磁盘上的Manifest文件中读取数据进行恢复
 
 下图是LevelDB运行期间, 各版本Version与Manifest中VersionEdit记录的关系, 在重新打开DB时从Manifest中读取Version SnapShot, 然后读取后面的所有VersionEdit记录并且依次作用于VersionSet::Builder, 最后通过SaveTo()方法即可以生成新的Version, 然后将其挂到VersionSet当中, 这时候DB启动就成功了
 
-<center>![Figure 5](../assets/img/ImgurAlbumLevelDBVersion/version_figure_5.png)</center>
+![Figure 5](../assets/img/ImgurAlbumLevelDBVersion/version_figure_5.png)
 
 ### 总结
 版本控制我认为是LevelDB中最难理解的一个模块，主要是其和Compact联系异常紧密，由VersionSet控制何时触发Compact，Compact完成之后生成新的Version又存于VersionSet当中，得益于LevelDB将随机写转化为顺序写的特性，sst文件一旦生成就不会再发生变化，一个旧的Version只需要加上sst文件的差值便可以成为一个新的Version，同时VersionSet内部将不同的Version按照环形双向链表进行保存，使之前某个时刻生成的迭代器可以继续访问老版本Version对应的数据，保证了迭代器访问的数据是某一个快照时刻的，不会随着数据的写入而发生变化
