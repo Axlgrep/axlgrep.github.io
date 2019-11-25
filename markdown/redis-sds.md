@@ -65,8 +65,8 @@ Alloced buf是用来存储字符串以及字符串结束符`\0`的buffer，我�
 
 * 剩余的freespace足够容纳target\_string和末尾`\0`字符，则不作任何操作
 * 剩余的freespace不够容纳target\_string和末尾的`\0`字符
-  * 当target_string_size < 1MB，则会直接分配2 * target\_string\_size的空间用于存储字符串
-  * 当target_string_size >= 1MB，则会再额外多分配1MB的空间用于存储字符串(target\_string\_size + 1024*1024)
+  * 当target\_string\_size < 1MB，则会直接分配2 * target\_string\_size的空间用于存储字符串
+  * 当target\_string\_size >= 1MB，则会再额外多分配1MB的空间用于存储字符串(target\_string\_size + 1024*1024)
 
 需要注意的是，当sds中字符串的长度修改之后，之前的sdshdr头可能存不下新sds中字符串的长度，这时候可能会替换sdshdr头的类型，我们需要对这种情况做一些额外的处理，这些处理操作可以参考sdsMakeRoomFor方法后半段的逻辑
 

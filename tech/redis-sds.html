@@ -539,8 +539,8 @@ pre[class*="language-"] {
 <li>剩余的freespace不够容纳target_string和末尾的<code>\0</code>字符
 
 <ul>
-<li>当target<em>string</em>size &lt; 1MB，则会直接分配2 * target_string_size的空间用于存储字符串</li>
-<li>当target<em>string</em>size &gt;= 1MB，则会再额外多分配1MB的空间用于存储字符串(target_string_size + 1024*1024)</li>
+<li>当target_string_size &lt; 1MB，则会直接分配2 * target_string_size的空间用于存储字符串</li>
+<li>当target_string_size &gt;= 1MB，则会再额外多分配1MB的空间用于存储字符串(target_string_size + 1024*1024)</li>
 </ul></li>
 </ul>
 

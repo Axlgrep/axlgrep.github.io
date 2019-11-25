@@ -12,9 +12,9 @@
 
 字典中的type和privdata属性是针对不同类型的键值对,为了创建多态字典而设置的,在字典初始化的时候可以根据字典中不同键值对的类型传入相对应的type以及Privdata,type指向一个dictType的结构体,结构体中保存用于操作特定类型键值对的函数指针, 而privdata属性则保存了需要传给特定键值对函数的可选参数.
 
-字典中的存在两个指向dictht的指针(dictht实际上就是HashTable,也就是Dict中真正存储数据的地方), 在当前没有rehash操作的时候,ht[0]指向一个其中dictht, 而ht[1]指向一个另一个大小为0的dictht,而在执行rehash操作的过程中,ht[0]指向迁出数据的dictht, ht[1]指向迁入数据的dictht
+字典中的存在两个指向dictht的指针(dictht实际上就是HashTable,也就是Dict中真正存储数据的地方), 在当前没有rehash操作的时候,ht[0]指向其中一个dictht, 而ht[1]指向另一个大小为0的dictht,而在执行rehash操作的过程中,ht[0]指向迁出数据的dictht, ht[1]指向迁入数据的dictht
 
-在执行rehash操作的过程中,rehashidx存储的就是ht[0]中下一次待迁移槽的位置,而如果当前没有执行rehash操作,则rehashidx的值便为-1
+在执行rehash操作的过程中,rehashidx存储的就是ht[0]中下一次待迁移buckets的位置,而如果当前没有执行rehash操作,则rehashidx的值便为-1
 
 iterators记录的是外界当前迭代该Dict迭代器的个数
 
@@ -70,7 +70,7 @@ typedef struct dictht {
 ### 哈希表中的结点: DictEntry
 dictEntry是Dictht中结点的表现形式, 每个dictEntry都保存着一个键值对, key属性指向键值对的键对象, 而v属性则保存着键值对的值, Redis采用了联合体来定义v, 使键值对的值既可以存储一个指针, 也可以存储有符号/无符号整形数据,甚至可以存储浮点形数据, Redis使用联合体的形式来存储键值对的值可以让内存使用更加精细灵活, 另外, 既然是HashTable, 不可避免会发生两个键不同但是计算出来存放索引相同的情况, 为了解决Hash冲突的问题, dictEntry还有一个next属性, 用来指向与当前dictEntry在同一个索引的下一个dictEntry.
 ![Figure 2](../assets/img/ImgurAlbumRedisDict/redis_dict_figure_2.png)
-下面列出了一个最简单的dictht, 这个哈希表大小为4(一共有四个可用索引),  其中已经存在三个dictEntry结点,我们可以看到其中key为0和1的两个dicEntry都落到了索引0上,Redis采用了链地址法,使计算出来相同索引的dictEntry用next指针构成了一个单项链表,以此来解决Hash冲突
+下面列出了一个最简单的dictht, 这个哈希表大小为4(一共有四个可用索引),  其中已经存在三个dictEntry结点,我们可以看到其中key为0和1的两个dicEntry都落到了索引0上,Redis采用了链地址法,使计算出来相同索引的dictEntry用next指针构成了一个单向链表,以此来解决Hash冲突
 ![Figure 3](../assets/img/ImgurAlbumRedisDict/redis_dict_figure_3.png)
 dictEntry的索引信息首先是通过构造字典时传入dictType中的`hashFunction((const void *key)方法`计算出一个hash值, 然后再用hash值与哈希表中的sizemask字段进行与运算,这样就能得到一个位于[0, size - 1]区间中的一个索引
 
@@ -182,7 +182,7 @@ Redis对HashTable执行rehash操作步骤如下:
  * 当迁移完成之后,ht[0]所指向的HashTable中已经没有任何节点,释放该HashTable, 并且令ht[0]指向迁入节点的新HashTable, 最后为ht[1]创建一个空白的HashTable,为下一次rehash做准备
 
 ### 渐进式Rehash
-前面提到够Rehash操作本质上就是将一个HashTable中的所有dictEntry节点迁移到另外一个HashTable上,考虑到在HashTable上dictEntry存在大量节点的情况下,节点迁移的过程将会非常长,这将会阻塞Redis服务,所以Redis的rehash操作并不是一次性完成的,而是分多次,渐进式的将ht[0]里的dictEntry慢慢rehash到ht[1]上,可以看一下下面rehash的关键方法:
+前面提到够Rehash操作本质上就是将一个HashTable中的所有dictEntry节点迁移到另外一个HashTable上,考虑到在HashTable上dictEntry存在大量节点的情况下,节点迁移的过程将会非常长,这将会阻塞Redis服务,所以Redis的rehash操作并不是一次性完成的,而是随着服务的运行分多次,渐进式的将ht[0]里的dictEntry慢慢rehash到ht[1]上,可以看一下下面rehash的关键方法:
 
 ```cpp
 /* Performs N steps of incremental rehashing. Returns 1 if there are still
