@@ -199,6 +199,8 @@ Raft通过比较日志中末尾条目的索引和任期来判断哪个日志更�
 
 broadcastTime和MTBF是由底层系统决定的性质，而electionTime则需要我们做出选择. Raft的RPC调用需要接收方将接收到的信息持久化到稳定的存储上，所以broadcastTime的时间基于存储技术大约在0.5ms ~ 20ms之间. 最终，electionTime一般在10ms ~ 500ms之间. 大多数服务的MTBF都在几个月甚至更长，这很容易满足时序需求.
 
+...
+
 
 
 
