@@ -12,6 +12,14 @@ void echo(int connfd) {
   }
 }
 
+void command(void) {
+  char buf[MAXLINE];
+  if (!fgets(buf, MAXLINE, stdin)) {
+    exit(0);
+  }
+  printf("%s", buf);
+}
+
 int open_listenfd(int port) {
   int listenfd, optval = 1;
   struct sockaddr_in serveraddr;
@@ -40,30 +48,37 @@ int open_listenfd(int port) {
 }
 
 int main(int argc, char **argv) {
+
   int listenfd, connfd, port;
-  socklen_t clientlen;
+  socklen_t clientlen = sizeof(struct sockaddr_in);
   struct sockaddr_in clientaddr;
-  struct hostent *hp;
-  char *haddrp;
+  fd_set read_set, ready_set;
 
   if (argc != 2) {
     fprintf(stderr, "usage: %s <port>\n", argv[0]);
     exit(0);
   }
+
   port = atoi(argv[1]);
-
   listenfd = open_listenfd(port);
+
+  FD_ZERO(&ready_set);
+  FD_SET(STDIN_FILENO, &read_set);
+  FD_SET(listenfd, &read_set);
+
   while (true) {
-    clientlen = sizeof(clientaddr);
-    connfd = accept(listenfd, (SA*)&clientaddr, &clientlen);
-    printf("server accept client(%s:%d), fd = %d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), connfd);
-
-    hp = gethostbyaddr((const char*)&clientaddr.sin_addr.s_addr, sizeof(clientaddr.sin_addr.s_addr), AF_INET);
-    haddrp = inet_ntoa(clientaddr.sin_addr);
-
-    echo(connfd);
-    close(connfd);
-    printf("server close client(%s:%d), fd = %d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), connfd);
+    ready_set = read_set;
+    int n = select(listenfd + 1, &read_set, NULL, NULL, NULL);
+    printf("num: %d fd ready\n", n);
+    if (FD_ISSET(STDIN_FILENO, &ready_set)) {
+      printf("STDIN_FILENO ready");
+      command();
+    }
+    if (FD_ISSET(listenfd, &ready_set)) {
+      printf("listenfd ready");
+      connfd = accept(listenfd, (SA*)&clientaddr, &clientlen);
+      echo(connfd);
+      close(connfd);
+    }
   }
-  exit(0);
 }

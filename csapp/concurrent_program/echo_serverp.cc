@@ -39,31 +39,36 @@ int open_listenfd(int port) {
   return listenfd;
 }
 
+void sigchld_handler(int sig) {
+  while (waitpid(-1, 0, WNOHANG) > 0);
+  return;
+}
+
 int main(int argc, char **argv) {
   int listenfd, connfd, port;
-  socklen_t clientlen;
+  socklen_t clientlen = sizeof(struct sockaddr_in);
   struct sockaddr_in clientaddr;
-  struct hostent *hp;
-  char *haddrp;
 
   if (argc != 2) {
     fprintf(stderr, "usage: %s <port>\n", argv[0]);
     exit(0);
   }
+
   port = atoi(argv[1]);
 
+  signal(SIGCHLD, sigchld_handler);
   listenfd = open_listenfd(port);
   while (true) {
-    clientlen = sizeof(clientaddr);
     connfd = accept(listenfd, (SA*)&clientaddr, &clientlen);
     printf("server accept client(%s:%d), fd = %d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), connfd);
 
-    hp = gethostbyaddr((const char*)&clientaddr.sin_addr.s_addr, sizeof(clientaddr.sin_addr.s_addr), AF_INET);
-    haddrp = inet_ntoa(clientaddr.sin_addr);
-
-    echo(connfd);
+    if (fork() == 0) {
+      close(listenfd);
+      echo(connfd);
+      close(connfd);
+      printf("server close client, fd = %d\n", connfd);
+      exit(0);
+    }
     close(connfd);
-    printf("server close client(%s:%d), fd = %d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port), connfd);
   }
-  exit(0);
 }
