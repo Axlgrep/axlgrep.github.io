@@ -56,7 +56,10 @@ extern char **environ; /* Defined by libc */
 #define LISTENQ  1024  /* Second argument to listen() */
 
 /* Our own error-handling functions */
-void unix_error(char *msg);
+void unix_error(char *msg) {
+  fprintf(stderr, "%s: %s\n", msg, strerror(errno));
+  exit(0);
+}
 void posix_error(int code, char *msg);
 void dns_error(char *msg);
 void app_error(char *msg);
