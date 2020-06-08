@@ -18,9 +18,11 @@ int inet_server_listen(int port) {
     return -1;
   }
 
+  /*
   if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEPORT, (const void*)&optval, sizeof(int)) < 0) {
     return -1;
   }
+  */
 
   bzero((char*)&serveraddr, sizeof(serveraddr));
   serveraddr.sin_family = AF_INET;

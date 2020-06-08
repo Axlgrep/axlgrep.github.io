@@ -1,6 +1,6 @@
 CXX=g++
 LDFLAGS=-lpthread -lsnappy
-CXXFLAGS=-std=c++11
+CXXFLAGS=-std=c++11 -g
 
 .PHONY : clean all
 

@@ -1,7 +1,16 @@
 #include "epoll.h"
 #include "unistd.h"
 
-Epoll::Epoll() {
+#include "inet_socket.h"
+#include "unix_socket.h"
+
+Epoll* Epoll::s_instance = NULL;
+
+Epoll::Epoll()
+    : inet_listen_fd(-1),
+      unix_listen_fd(-1),
+      unix_conn_fd(-1),
+      unix_client_fd(-1) {
   epfd_ = epoll_create(1024);
 }
 
@@ -54,4 +63,41 @@ int Epoll::DelEvent(const int fd) {
   struct epoll_event ee;
   ee.data.fd = fd;
   return epoll_ctl(epfd_, EPOLL_CTL_DEL, fd, &ee);
+}
+
+bool Epoll::detachInetListenFd() {
+  DelEvent(inet_listen_fd);
+  close(inet_listen_fd);
+  inet_listen_fd = -1;
+}
+
+bool Epoll::attachInetListenFd(int il_fd) {
+  inet_listen_fd = il_fd;
+  AddEvent(inet_listen_fd, EPOLLIN);
+  return true;
+}
+
+bool Epoll::startInetServer(int port) {
+  inet_listen_fd = inet_server_listen(port);
+  if (inet_listen_fd == -1) {
+    return false;
+  }
+  AddEvent(inet_listen_fd, EPOLLIN);
+  return true;
+}
+
+bool Epoll::startUnixServer(const std::string& path) {
+  unix_listen_fd = unix_server_listen(path.data());
+  if (unix_listen_fd < 0) {
+    return false;
+  }
+  AddEvent(unix_listen_fd, EPOLLIN);
+  return true;
+}
+
+Epoll* Epoll::getInstance() {
+  if (!s_instance) {
+    s_instance = new Epoll();
+  }
+  return s_instance;
 }

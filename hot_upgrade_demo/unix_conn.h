@@ -1,12 +1,7 @@
 #ifndef UNIX_CONN_H_
 #define UNIX_CONN_H_
 
-enum RecvMsgStatus {
-  kRecvMsgOk = 0,
-  kRecvMSGParseError = 1,
-  kRecvMsgError = 2,
-  kRecvMsgClose = 3,
-};
+#include "unix_socket.h"
 
 class UnixConn {
  public:
@@ -14,7 +9,13 @@ class UnixConn {
   ~UnixConn();
 
   int NewFd();
-  RecvMsgStatus RecvFD();
+  RecvMsgStatus processRecv();
+  SendMsgStatus processSend();
+
+  bool makeCommonReply();
+  bool HandleListenFdMsg(const msghdr& msg);
+  bool HandleSessionFdMsg(const msghdr& msg);
+
  private:
   int fd_;
   int new_fd_;
