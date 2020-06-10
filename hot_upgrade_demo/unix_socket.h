@@ -4,6 +4,11 @@
 #include "string.h"
 #include "iostream"
 
+//const int64_t MSG_DATA_BUF_LEN = 5368709120; // 5GB
+//const int64_t MSG_DATA_BUF_LEN = 2147483648; // 2GB
+//const int64_t MSG_DATA_BUF_LEN = 1073741824;   // 1GB
+const int64_t MSG_DATA_BUF_LEN = 1024;
+
 const std::string reply_ok = "ok";
 
 enum MsgRequestType {

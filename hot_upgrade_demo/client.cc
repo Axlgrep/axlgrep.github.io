@@ -12,7 +12,7 @@
 
 #include "inet_socket.h"
 
-#define CLIENT_NUM  100
+#define CLIENT_NUM  10
 #define BUFFER_SIZE 1024
 
 int client_echo_request(int client_fd) {

@@ -64,9 +64,9 @@ int handle_net_event(FiredEvent *fe) {
   if (fe->mask & EPOLLIN && conn->EmptyReadBuf() && unix_client) {
     SendMsgStatus sms = unix_client->TransferSessionFd(fe->fd);
     if (sms == kSendMsgOk) {
-      printf("send conn(%s) tcp connection success\n", conn->IpPort().data());
+      printf("send conn(%s) tcp connection success, close local connFD\n", conn->IpPort().data());
     } else {
-      printf("send conn(%s) tcp connection failed\n", conn->IpPort().data());
+      printf("send conn(%s) tcp connection failed: %d\n", conn->IpPort().data(), sms);
     }
     return -1;
   }
@@ -102,28 +102,28 @@ int main(int argc, char** argv) {
     fprintf(stderr, "should input detect file, exit...\n");
     exit(-1);
   }
-  std::string path = std::string(argv[1]);
 
-  if (path != UNIX_SERVER_TRIGGER) {
+  std::string path = std::string(argv[1]);
+  if (path == "-u") {
+    ret = Epoll::getInstance()->startUnixServer(UNIX_SOCKET_LOCK_FILE);
+    if (!ret) {
+      perror("open unix listen fd error");
+      exit(-1);
+    }
+    printf("start IF_UNIX server success\n");
+  } else {
     ret = Epoll::getInstance()->startInetServer(port);
     if (!ret) {
       perror("open inet listen fd error");
       exit(-1);
     }
+    printf("start IF_INET server success\n");
   }
 
   for (;;) {
 
     if (FileExists(path) && !unix_socket_init) {
-      if (path == UNIX_SERVER_TRIGGER) {
-        ret = Epoll::getInstance()->startUnixServer(UNIX_SOCKET_LOCK_FILE);
-        if (!ret) {
-          perror("open unix listen fd error");
-          exit(-1);
-        }
-        printf("open unix listenfd success\n");
-        unix_socket_init = true;
-      } else if (path == UNIX_CLIENT_TRIGGER) {
+      if (path == UNIX_CLIENT_TRIGGER) {
         unix_client_fd = unix_client_conn(UNIX_SOCKET_LOCK_FILE);
         if (unix_client_fd < 0) {
           perror("open client fd error");
@@ -132,8 +132,13 @@ int main(int argc, char** argv) {
         unix_client = new UnixClient(unix_client_fd);
         printf("unix client connection success\n");
         unix_socket_init = true;
-        unix_client->TransferListenFd(Epoll::getInstance()->inet_listen_fd);
-        Epoll::getInstance()->detachInetListenFd();
+        SendMsgStatus sms = unix_client->TransferListenFd(Epoll::getInstance()->inet_listen_fd);
+        if (sms == kSendMsgOk) {
+          printf("send listenFD success, close local listenFD\n");
+          Epoll::getInstance()->detachInetListenFd();
+        } else {
+          printf("send listenFD failed\n");
+        }
       }
     }
 
@@ -166,6 +171,7 @@ int main(int argc, char** argv) {
         }
         unix_conn = new UnixConn(unix_conn_fd);
         Epoll::getInstance()->AddEvent(unix_conn_fd, EPOLLIN);
+        printf("accept unix conn\n");
       } else if (fe->fd == unix_conn_fd) {
         int ret = handle_unix_event(fe);
         if (ret == -1) {

@@ -8,6 +8,7 @@
 #include "iostream"
 
 #include "epoll.h"
+#include "assert.h"
 #include "unix_conn.h"
 
 /* size of control buffer to send/recv one file descriptor */
@@ -15,48 +16,58 @@
 
 UnixConn::UnixConn(const int fd): fd_(fd) {
   cmptr = (struct cmsghdr*)malloc(CMSG_LEN(sizeof(int)));
+  msgDataBuf = (char*)malloc(MSG_DATA_BUF_LEN);
 }
 
 UnixConn::~UnixConn() {
   free(cmptr);
-}
-
-int UnixConn::NewFd() {
-  return new_fd_;
+  free(msgDataBuf);
 }
 
 RecvMsgStatus UnixConn::processRecv() {
-  char          msgTypeBuf[4];
-  char          msgDataBuf[128];
-  struct iovec  iov[2];
+  struct iovec  iov[1];
   struct msghdr msg;
 
-  iov[0].iov_base = msgTypeBuf;
-  iov[0].iov_len = sizeof(msgTypeBuf);
-  iov[1].iov_base = msgDataBuf;
-  iov[1].iov_len = sizeof(msgDataBuf);
+  iov[0].iov_base = msgDataBuf;
+  iov[0].iov_len = MSG_DATA_BUF_LEN;
 
   msg.msg_iov = iov;
-  msg.msg_iovlen = 2;
+  msg.msg_iovlen = 1;
   msg.msg_name = NULL;
   msg.msg_namelen = 0;
   msg.msg_control = cmptr;
   msg.msg_controllen = CMSG_LEN(sizeof(int));
-  int readlen = recvmsg(fd_, &msg, 0);
-  printf("recvmsg len: %d\n", readlen);
-  if (readlen == -1) {
-    return kRecvMsgError;
-  }
-  if (readlen == 0) {
-    return kRecvMsgClose;
+
+  int64_t read = 0;
+  std::string requestStr;
+  while (read < MSG_DATA_BUF_LEN) {
+    int64_t readlen = recvmsg(fd_, &msg, 0);
+    if (readlen == 0) {
+      return kRecvMsgClose;
+    }
+
+    if (readlen == -1) {
+      if (errno == EAGAIN || errno == EINTR) {
+        continue;
+      }
+      perror("recvmsg");
+      return kRecvMsgClose;
+    }
+    requestStr.append(msgDataBuf, readlen);
+    read += readlen;
+    //printf("readlen: %ld\n", read);
   }
 
+  int fd = *(int*)CMSG_DATA(msg.msg_control);
+
   uint32_t msgType = 0;
-  memcpy(&msgType, msgTypeBuf, sizeof(msgType));
+  memcpy(&msgType, requestStr.data(), sizeof(uint32_t));
+  requestStr = requestStr.substr(sizeof(uint32_t));
+
   if (msgType == MsgRequestType::kTransferListenFd) {
-    HandleListenFdMsg(msg);
+    HandleListenFdMsg(fd, requestStr);
   } else if (msgType == MsgRequestType::kTransferSessionFd) {
-    HandleSessionFdMsg(msg);
+    HandleSessionFdMsg(fd, requestStr);
   } else {
     return kRecvMSGParseError;
   }
@@ -82,37 +93,38 @@ bool UnixConn::makeCommonReply() {
   msgReplyBuf[reply_ok.size()] = 0;
 
   int sendlen = sendmsg(fd_, &msg, 0);
-  printf("common reply sendlen: %d\n", sendlen);
+  //printf("common reply sendlen: %d\n", sendlen);
   if (sendlen != sizeof(msgReplyBuf)) {
     return false;
   }
   return true;
 }
 
-bool UnixConn::HandleListenFdMsg(const msghdr& msg) {
-  if (msg.msg_controllen != CMSG_LEN(sizeof(int))) {
-    return false;
-  }
-  int listen_fd = *(int*)CMSG_DATA(msg.msg_control);
-  std::string msgDataStr = std::string((char*)msg.msg_iov[1].iov_base);
-  printf("handle listenfd msg: %s\n", msgDataStr.data());
-  Epoll::getInstance()->attachInetListenFd(listen_fd);
+bool UnixConn::HandleListenFdMsg(int fd, const std::string& buffer) {
+
+  uint32_t dataLen = 0;
+  memcpy(&dataLen, buffer.data(), sizeof(uint32_t));
+  assert(buffer.size() > sizeof(uint32_t));
+  std::string data = buffer.substr(sizeof(uint32_t));
+
+  printf("receive listenFD success, dataLen: %d, data: %s\n", dataLen, data.data());
+  Epoll::getInstance()->attachInetListenFd(fd);
   makeCommonReply();
   return true;
 }
 
-bool UnixConn::HandleSessionFdMsg(const msghdr& msg) {
-  if (msg.msg_controllen != CMSG_LEN(sizeof(int))) {
-    return false;
-  }
+bool UnixConn::HandleSessionFdMsg(int fd, const std::string& buffer) {
 
-  int session_fd = *(int*)CMSG_DATA(msg.msg_control);
-  std::string msgDataStr = std::string((char*)msg.msg_iov[1].iov_base);
-  printf("handle sessionfd msg: %s\n", msgDataStr.data());
-  InetConn *conn = new InetConn(session_fd, "received conn tmp no ip_port");
+  uint32_t dataLen = 0;
+  memcpy(&dataLen, buffer.data(), sizeof(uint32_t));
+  assert(buffer.size() > sizeof(uint32_t));
+  std::string data = buffer.substr(sizeof(uint32_t));
+
+  printf("receive tcp connection success, dataLen: %d, data: %s\n", dataLen, data.data());
+  InetConn *conn = new InetConn(fd, "received conn tmp no ip_port");
   conn->SetNonblock();
-  Epoll::getInstance()->inet_conn_map[session_fd] = conn;
-  Epoll::getInstance()->AddEvent(session_fd, EPOLLIN | EPOLLET);
+  Epoll::getInstance()->inet_conn_map[fd] = conn;
+  Epoll::getInstance()->AddEvent(fd, EPOLLIN | EPOLLET);
   makeCommonReply();
   return true;
 }

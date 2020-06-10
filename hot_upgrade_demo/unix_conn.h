@@ -8,18 +8,17 @@ class UnixConn {
   UnixConn(const int fd);
   ~UnixConn();
 
-  int NewFd();
   RecvMsgStatus processRecv();
   SendMsgStatus processSend();
 
   bool makeCommonReply();
-  bool HandleListenFdMsg(const msghdr& msg);
-  bool HandleSessionFdMsg(const msghdr& msg);
+  bool HandleListenFdMsg(int fd, const std::string& buffer);
+  bool HandleSessionFdMsg(int fd, const std::string& buffer);
 
  private:
   int fd_;
-  int new_fd_;
   struct cmsghdr *cmptr;
+  char *msgDataBuf;
 
   UnixConn(const UnixConn&);
   void operator=(const UnixConn&);

@@ -11,10 +11,12 @@
 
 UnixClient::UnixClient(const int fd): fd_(fd) {
   cmptr = (struct cmsghdr*)malloc(CMSG_LEN(sizeof(int)));
+  msgDataBuf = (char*)malloc(MSG_DATA_BUF_LEN);
 }
 
 UnixClient::~UnixClient() {
   free(cmptr);
+  free(msgDataBuf);
 }
 
 bool UnixClient::GetReply() {
@@ -37,25 +39,23 @@ bool UnixClient::GetReply() {
 }
 
 SendMsgStatus UnixClient::TransferListenFd(const int listen_fd) {
-  char          msgTypeBuf[4];
-  char          msgDataBuf[128];
-  struct iovec  iov[2];
+  struct iovec  iov[1];
   struct msghdr msg;
 
-  memset(msgTypeBuf, 0, sizeof(msgTypeBuf));
   uint32_t msgType = MsgRequestType::kTransferListenFd;
-  memcpy(msgTypeBuf, &msgType, sizeof(msgType));
+  std::string data = "listen fd data";
+  uint32_t dataLen = data.size();
 
-  memset(msgDataBuf, 0, sizeof(msgDataBuf));
-  memcpy(msgDataBuf, "listen fd data", 15);
+  memset(msgDataBuf, 0, MSG_DATA_BUF_LEN);
+  memcpy(msgDataBuf, &msgType, sizeof(uint32_t));
+  memcpy(msgDataBuf + sizeof(uint32_t), &dataLen, sizeof(uint32_t));
+  memcpy(msgDataBuf + 2 * sizeof(uint32_t), data.data(), data.size());
 
-  iov[0].iov_base = msgTypeBuf;
-  iov[0].iov_len = sizeof(msgTypeBuf);
-  iov[1].iov_base = msgDataBuf;
-  iov[1].iov_len = sizeof(msgDataBuf);
+  iov[0].iov_base = msgDataBuf;
+  iov[0].iov_len = MSG_DATA_BUF_LEN;
 
   msg.msg_iov = iov;
-  msg.msg_iovlen = 2;
+  msg.msg_iovlen = 1;
   msg.msg_name = NULL;
   msg.msg_namelen = 0;
 
@@ -67,8 +67,19 @@ SendMsgStatus UnixClient::TransferListenFd(const int listen_fd) {
   msg.msg_control = cmptr;
   msg.msg_controllen = CMSG_LEN(sizeof(int));
 
-  int sendlen = sendmsg(fd_, &msg, 0);
-  if (sendlen != sizeof(msgTypeBuf) + sizeof(msgDataBuf)) {
+  int64_t send = 0;
+  while (send < MSG_DATA_BUF_LEN) {
+    int64_t sendlen = sendmsg(fd_, &msg, 0);
+    if (sendlen == -1) {
+      if (errno == EINTR || errno == EAGAIN) {
+        continue;
+      }
+      return kSendMsgError;
+    }
+    send += sendlen;
+    //printf("sendlen: %ld\n", send);
+  }
+  if (send != MSG_DATA_BUF_LEN) {
     return kSendMsgError;
   }
   GetReply();
@@ -76,25 +87,23 @@ SendMsgStatus UnixClient::TransferListenFd(const int listen_fd) {
 }
 
 SendMsgStatus UnixClient::TransferSessionFd(const int session_fd) {
-  char          msgTypeBuf[4];
-  char          msgDataBuf[128];
-  struct iovec  iov[2];
+  struct iovec  iov[1];
   struct msghdr msg;
 
-  memset(msgTypeBuf, 0, sizeof(msgTypeBuf));
   uint32_t msgType = MsgRequestType::kTransferSessionFd;
-  memcpy(msgTypeBuf, &msgType, sizeof(msgType));
+  std::string data = "session fd data";
+  uint32_t dataLen = data.size();
 
-  memset(msgDataBuf, 0, sizeof(msgDataBuf));
-  memcpy(msgDataBuf, "session fd data", 16);
+  memset(msgDataBuf, 0, MSG_DATA_BUF_LEN);
+  memcpy(msgDataBuf, &msgType, sizeof(uint32_t));
+  memcpy(msgDataBuf + sizeof(uint32_t), &dataLen, sizeof(uint32_t));
+  memcpy(msgDataBuf + 2 * sizeof(uint32_t), data.data(), data.size());
 
-  iov[0].iov_base = msgTypeBuf;
-  iov[0].iov_len = sizeof(msgTypeBuf);
-  iov[1].iov_base = msgDataBuf;
-  iov[1].iov_len = sizeof(msgDataBuf);
+  iov[0].iov_base = msgDataBuf;
+  iov[0].iov_len = MSG_DATA_BUF_LEN;
 
   msg.msg_iov = iov;
-  msg.msg_iovlen = 2;
+  msg.msg_iovlen = 1;
   msg.msg_name = NULL;
   msg.msg_namelen = 0;
 
@@ -106,10 +115,22 @@ SendMsgStatus UnixClient::TransferSessionFd(const int session_fd) {
   msg.msg_control = cmptr;
   msg.msg_controllen = CMSG_LEN(sizeof(int));
 
-  int sendlen = sendmsg(fd_, &msg, 0);
-  if (sendlen != sizeof(msgTypeBuf) + sizeof(msgDataBuf)) {
+  int64_t send = 0;
+  while (send < MSG_DATA_BUF_LEN) {
+    int64_t sendlen = sendmsg(fd_, &msg, 0);
+    if (sendlen == -1) {
+      if (errno == EINTR || errno == EAGAIN) {
+        continue;
+      }
+      perror("sendmsg");
+      return kSendMsgError;
+    }
+    send += sendlen;
+  }
+  if (send != MSG_DATA_BUF_LEN) {
     return kSendMsgError;
   }
+  GetReply();
   return kSendMsgOk;
 }
 

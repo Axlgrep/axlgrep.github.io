@@ -14,6 +14,7 @@ class UnixClient {
  private:
   int fd_;
   struct cmsghdr *cmptr;
+  char *msgDataBuf;
 
   UnixClient(const UnixClient&);
   void operator=(const UnixClient&);
