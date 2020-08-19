@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>yunji-global</title>
+
+
+<style type="text/css">
+body {
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: white;
+  padding: 30px; }
+
+body > *:first-child {
+  margin-top: 0 !important; }
+body > *:last-child {
+  margin-bottom: 0 !important; }
+
+a {
+  color: #4183C4; }
+a.absent {
+  color: #cc0000; }
+a.anchor {
+  display: block;
+  padding-left: 30px;
+  margin-left: -30px;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0; }
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 20px 0 10px;
+  padding: 0;
+  font-weight: bold;
+  -webkit-font-smoothing: antialiased;
+  cursor: text;
+  position: relative; }
+
+h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA09pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoMTMuMCAyMDEyMDMwNS5tLjQxNSAyMDEyLzAzLzA1OjIxOjAwOjAwKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OUM2NjlDQjI4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OUM2NjlDQjM4ODBGMTFFMTg1ODlEODNERDJBRjUwQTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5QzY2OUNCMDg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo5QzY2OUNCMTg4MEYxMUUxODU4OUQ4M0REMkFGNTBBNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PsQhXeAAAABfSURBVHjaYvz//z8DJYCRUgMYQAbAMBQIAvEqkBQWXI6sHqwHiwG70TTBxGaiWwjCTGgOUgJiF1J8wMRAIUA34B4Q76HUBelAfJYSA0CuMIEaRP8wGIkGMA54bgQIMACAmkXJi0hKJQAAAABJRU5ErkJggg==) no-repeat 10px center;
+  text-decoration: none; }
+
+h1 tt, h1 code {
+  font-size: inherit; }
+
+h2 tt, h2 code {
+  font-size: inherit; }
+
+h3 tt, h3 code {
+  font-size: inherit; }
+
+h4 tt, h4 code {
+  font-size: inherit; }
+
+h5 tt, h5 code {
+  font-size: inherit; }
+
+h6 tt, h6 code {
+  font-size: inherit; }
+
+h1 {
+  font-size: 28px;
+  color: black; }
+
+h2 {
+  font-size: 24px;
+  border-bottom: 1px solid #cccccc;
+  color: black; }
+
+h3 {
+  font-size: 18px; }
+
+h4 {
+  font-size: 16px; }
+
+h5 {
+  font-size: 14px; }
+
+h6 {
+  color: #777777;
+  font-size: 14px; }
+
+p, blockquote, ul, ol, dl, li, table, pre {
+  margin: 15px 0; }
+
+hr {
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
+  border: 0 none;
+  color: #cccccc;
+  height: 4px;
+  padding: 0;
+}
+
+body > h2:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+body > h1:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+  body > h1:first-child + h2 {
+    margin-top: 0;
+    padding-top: 0; }
+body > h3:first-child, body > h4:first-child, body > h5:first-child, body > h6:first-child {
+  margin-top: 0;
+  padding-top: 0; }
+
+a:first-child h1, a:first-child h2, a:first-child h3, a:first-child h4, a:first-child h5, a:first-child h6 {
+  margin-top: 0;
+  padding-top: 0; }
+
+h1 p, h2 p, h3 p, h4 p, h5 p, h6 p {
+  margin-top: 0; }
+
+li p.first {
+  display: inline-block; }
+li {
+  margin: 0; }
+ul, ol {
+  padding-left: 30px; }
+
+ul :first-child, ol :first-child {
+  margin-top: 0; }
+
+dl {
+  padding: 0; }
+  dl dt {
+    font-size: 14px;
+    font-weight: bold;
+    font-style: italic;
+    padding: 0;
+    margin: 15px 0 5px; }
+    dl dt:first-child {
+      padding: 0; }
+    dl dt > :first-child {
+      margin-top: 0; }
+    dl dt > :last-child {
+      margin-bottom: 0; }
+  dl dd {
+    margin: 0 0 15px;
+    padding: 0 15px; }
+    dl dd > :first-child {
+      margin-top: 0; }
+    dl dd > :last-child {
+      margin-bottom: 0; }
+
+blockquote {
+  border-left: 4px solid #dddddd;
+  padding: 0 15px;
+  color: #777777; }
+  blockquote > :first-child {
+    margin-top: 0; }
+  blockquote > :last-child {
+    margin-bottom: 0; }
+
+table {
+  padding: 0;border-collapse: collapse; }
+  table tr {
+    border-top: 1px solid #cccccc;
+    background-color: white;
+    margin: 0;
+    padding: 0; }
+    table tr:nth-child(2n) {
+      background-color: #f8f8f8; }
+    table tr th {
+      font-weight: bold;
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr td {
+      border: 1px solid #cccccc;
+      margin: 0;
+      padding: 6px 13px; }
+    table tr th :first-child, table tr td :first-child {
+      margin-top: 0; }
+    table tr th :last-child, table tr td :last-child {
+      margin-bottom: 0; }
+
+img {
+  max-width: 100%; }
+
+span.frame {
+  display: block;
+  overflow: hidden; }
+  span.frame > span {
+    border: 1px solid #dddddd;
+    display: block;
+    float: left;
+    overflow: hidden;
+    margin: 13px 0 0;
+    padding: 7px;
+    width: auto; }
+  span.frame span img {
+    display: block;
+    float: left; }
+  span.frame span span {
+    clear: both;
+    color: #333333;
+    display: block;
+    padding: 5px 0 0; }
+span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-center > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: center; }
+  span.align-center span img {
+    margin: 0 auto;
+    text-align: center; }
+span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both; }
+  span.align-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px 0 0;
+    text-align: right; }
+  span.align-right span img {
+    margin: 0;
+    text-align: right; }
+span.float-left {
+  display: block;
+  margin-right: 13px;
+  overflow: hidden;
+  float: left; }
+  span.float-left span {
+    margin: 13px 0 0; }
+span.float-right {
+  display: block;
+  margin-left: 13px;
+  overflow: hidden;
+  float: right; }
+  span.float-right > span {
+    display: block;
+    overflow: hidden;
+    margin: 13px auto 0;
+    text-align: right; }
+
+code, tt {
+  margin: 0 2px;
+  padding: 0 5px;
+  white-space: nowrap;
+  border: 1px solid #eaeaea;
+  background-color: #f8f8f8;
+  border-radius: 3px; }
+
+pre code {
+  margin: 0;
+  padding: 0;
+  white-space: pre;
+  border: none;
+  background: transparent; }
+
+.highlight pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+
+pre {
+  background-color: #f8f8f8;
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  line-height: 19px;
+  overflow: auto;
+  padding: 6px 10px;
+  border-radius: 3px; }
+  pre code, pre tt {
+    background-color: transparent;
+    border: none; }
+
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb
+}
+
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:0 auto;
+    }
+}
+@media print {
+	table, pre {
+		page-break-inside: avoid;
+	}
+	pre {
+		word-wrap: break-word;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h2 id="toc_0">腾讯云Redis偶现客户端超时排查</h2>
+
+<h3 id="toc_1">问题描述</h3>
+
+<p>云集客户那边会偶现客户端超时的现象, 跟客户了解了相关情况之后, 确认了客户端那边设置的超时时长是2s, 有pipeline行为, 然后从客户端报错的日志来看, 是等待响应超时(<code>wait response timeout</code>), 也就是说客户发送命令之后长达2s都没有收到proxy这边的响应, 十分诡异.</p>
+
+<h3 id="toc_2">初步分析</h3>
+
+<p>接到问题之后我们首先看了一下用户执行的命令, 发现用户没有类似<code>keys *</code>这种很重的命令(用户是集群版, 目前也不支持<code>keys *</code>), 所以单个命令执行时长超过2秒肯定是不正常的, 紧接着我们又从Proxy上报的slowlog来看, 发现用户出现超时之后的一段时间, 几乎在同一个时刻上报了上百条耗时长达17分钟的slowlog, 并且这一批slowlog都来自于同一个Proxy结点.</p>
+
+<p>根据以往的经验, 耗时这么夸张的slowlog基本都是由于单个客户端连接卡死了, 并且客户端当前持有了很多还未完成的命令(这和用户有pipeline的行为相吻合), 在卡死了很长一段时间之后, 连接断开, Proxy会将这条连接还未完成的命令一起上报slowlog, 这个时候距离接收命令可能已经过了很长一段时间了(很可能达到了前面提到的17分钟)</p>
+
+<p>由于之前proxy确实存在过在大request或者大response场景下协议解析的bug(已读取数据在连接的buffer中由于解析bug无法被消费, 导致该连接直接被卡死, 此外, 由于proxy中的epoll采用了<code>Level Triggered</code>模式, 被卡死的连接如果还有未接收的数据, 会一直通知有可读事件产生, 导致了CPU空转, 出现单核被打满现象), 最终导致客户端单个连接卡死的问题, 于是我们到产生slowlog的proxy机器上查看问题发生时的CPU使用情况, 找遍了所有的核, 并没有发现被打满的情况, 于是基本排除了是由于之前proxy解析bug导致的连接卡死(如果是协议解析的bug, cpu监控图应该如下, 有单核cpu被打满的现象).</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_1.png" alt="Figure 1"></p>
+
+<p>我们还发现在上报慢日志的proxy节点上, 有日志表明当时有一条ClusterConn(后端连接, Proxy &lt;---&gt; Cache)断开, 并且日志表明这条后端连接并不是处于连接池当中的空闲连接, 而是被ClusterSession(前端连接, Client &lt;---&gt; Proxy)持有的, 通过监控, 我们发现用户之前也出现了几次客户端超时的问题, 我们到对应的proxy上都发现了ClusterConn异常断开的日志, 所以当时严重怀疑ClusterConn的断开和用户客户端出现超时报错存在某种联系.</p>
+
+<div><pre><code class="language-cpp">[ClusterConnPool.cpp][973]redis server conn error closed:9.178.140.8:2439
+[ClusterConnPool.cpp][1024]reids conn closed with client session attach</code></pre></div>
+
+<p>此外, 这条日志是在proxy中的<code>processNetError</code>函数中打印的, 该函数有多个入口,  有可能后端连接发送命令或者接收回复失败, 或者是建连失败, 或者是连接异常(发生<code>EPOLLHUP | EPOLLERR</code>事件), 都会调到<code>processNetError</code>, 但是如果是由于后端发送命令或者是接收回复失败导致调用<code>processNetError</code>, 应该有其他更多日志打印出来, 但是在我们的日志中并没有出现, 所以我们基本可以排除前两种原因, 将入口缩小为建连失败或者是连接异常.</p>
+
+<h3 id="toc_3">命令处理流程</h3>
+
+<p>下面先梳理一下Proxy对客户端发来请求的处理流程:</p>
+
+<ol>
+<li>ClusterSession将从客户端接收到的命令按照先后顺序存放在自己维护的<code>CommandList</code>中.</li>
+<li>ClusterSession将已经成功接收的命令分发给ClusterConn, ClusterConn会将这些命令按照顺序放到自己维护的<code>SendCommandList</code>当中, 等待转发给Redis.</li>
+<li>ClusterConn将已经完全转发给Redis的命令从<code>SendCommandList</code>中移除, 并且按先后追加到<code>WaitReplyCommandList</code>末尾, 等待接收Redis的回复.</li>
+<li>当已经从Redis获取到一条命令的返回结果, 将该条命令从<code>WaitReplyCommandList</code>头部移除, 并且通知ClusterSession将对应的命令返回结果写回给客户端.</li>
+<li>当命令结果完全写回给客户端, 将该条命令从ClusterSession的<code>CommandList</code>中移除</li>
+</ol>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_2.png" alt="Figure 2"></p>
+
+<p>如果在处理过程中, 后端连接异常关闭了, ClusterConn会将当前自身持有的命令(<code>SendCommandList</code>和<code>WaitReplyCommandList</code>中的命令)的回复都设置为<code>-ERR server closed connection\r\n</code>, 及时告知客户端当前连接出问题了.</p>
+
+<h3 id="toc_4">第一次抓包</h3>
+
+<p>由于监控信息和日志能够获取到的信息不足以定位问题, 而用户客户端超时的问题很可能继续出现, 于是我们便在Proxy和Cache都部署了抓包, 等待问题再次复现, 不到半天, 问题果然复现了, 和之前一样, 出问题的时候日志中也显示有后端连接出现了断连:</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_3.png" alt="Figure 3"></p>
+
+<p>由于出问题之前我们部署了抓包程序, 从抓包数据中我们获取了更多的线索:</p>
+
+<ol>
+<li>我们发现了在Cache测的抓包中存在一个后端连接的<code>RST</code>的包, 我们猜测这个由于<code>RST</code>包异常断开的连接就是我们日志中打印的那条异常断开的连接, 但是我们仔细比对了时间, 发现连接异常断开的日志是在<code>2020-8-5 13:25:16</code>打印的, 但是<code>RST</code>包却是在<code>2020-8-5 13:27:46</code>产生的, 有点可疑, 但是我们再深入分析, 发现<code>RST</code>包的产生是由于Cache到了300s给我们发送的<code>KeepAlive</code>触发的. 很可能在此之前, 这条连接早已异常了, 也就是说proxy在<code>2020-8-5 13:25:16</code>检测到了连接异常, 此时打印了日志, 但是到了<code>2020-8-5 13:27:46</code>Cache给Proxy发送<code>KeepAlive</code>包, 这时才发现连接异常, 产生了<code>RST</code>包, 这么解释是完全说得通的.</li>
+<li><code>RST</code>包的产生时间和proxy打印连接异常断开的日志对不上的问题分析清楚之后, 这条连接还有一个可疑的点是, 在这个后端连接异常断开之前很长的一段时间, Proxy既没有给Cache发送数据包, 也没有给Cache发送<code>KeepAlive</code>包(<code>KeepAlive</code>包只有在没有数据包发送的时候才会产生, 否则数据包自身有<code>KeepAlive</code>的功能), 但是在此期间Cache给我们回的<code>KeepAlive</code>包我们是可以正常响应ACK的, 这说明连接当时还是存活的. </li>
+<li>另外我们追踪了出现超时的客户端的TCP流, 发现在客户端超时之后, 连接并没有立即断开, 并且之后Proxy给客户端回复了<code>-ERR server closed connection\r\n</code>, 这说明当时有后端连接异常关闭, 并且当时后端连接中的<code>SendCommandList</code>或者<code>WaitReplyCommandList</code>中有未处理完的命令, 这个信息让我们完全确认了日志所在的<code>processNetError</code>函数是由于连接异常断开才调用的, 因为集合既然有未处理完的命令, 这说明后端连接早已建立成功. 排除了由于建连失败调用的<code>processNetError</code>, 但是由于proxy日志不全面, 我们并不能确认未处理完的命令到底处于哪个集合当中.</li>
+</ol>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_4.png" alt="Figure 4"></p>
+
+<p>我们在Proxy --&gt; Cache方向上的<code>SO_KEEPALIVE</code>我们设置的是15s, 而Cache --&gt; Proxy方向是设置的<code>SO_KEEPALIVE</code>是300s,  所以如果一个连接空闲情况下, 应该按照下面抓包截图一样, Proxy每隔15s给Cache发送一个<code>KeepAlive</code>包, Cache给我们回<code>Keep-Alive Ack</code>, Cache每隔300s给Proxy发送一个<code>KeepAlive</code>包, Proxy给Cache回<code>Keep-Alive Ack</code>.</p>
+
+<p>像上面截图中从<code>2020-08-05 13:12:45</code>到<code>2020-08-05 13:27:46</code>长达15分钟里, 只有Cache给Proxy发<code>Keep-Alive</code>(<code>TCP/IP 详解 卷一</code>中对<code>Keep-Alive</code>的描述是: 如果在一段时间(称为保活时间, keepalive time)内连接处于非活动状态, 开启保活功能的一端将向对方发送一个探测报文)包, Proxy没有发出任何数据包和<code>Keep-Alive</code>给Cache实在让人匪夷所思</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_5.png" alt="Figure 5"></p>
+
+<p>问题查到这里, 我们已经严重怀疑是操作系统或者是硬件问题导致的了(由于出问题的Proxy我们发现都是部署在AEP新硬件机器上的, 怀疑是不是对新硬件的兼容或者其他原因导致的bug), 这时候我们采取了两个措施:</p>
+
+<ul>
+<li>联系客户, 将部署在AEP新硬件机器上的Proxy迁移到相对老的比较稳定的机器上, 以防万一, 怕迁移到稳定机器之后还是继续出现问题, 我们抓包没停, 并且在Proxy中加了更加详细的日志, 方便再次出现问题时可以精准定位.</li>
+<li>拉了<code>h_tlinux_Helper</code>的同学, 将我们当前的问题进行描述, 以及将抓包信息同步给他们协助排查问题.</li>
+</ul>
+
+<p>我们还是想弄清楚在后端连接异常断开时到底是<code>SendCommandList</code>还是<code>WaitReplyCommandList</code>里面有堆积, 于是我们在处理连接异常的逻辑中添加了两行日志, 分别打印出在后端连接断开时<code>SendCommandList</code>中堆积的命令, 包括命令大小以及已经发送出的字节数, 以及<code>WaitReplyCommandList</code>中堆积的命令, 以及命令返回结果的状态, 对Proxy改动如下:</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_6.png" alt="Figure 6"></p>
+
+<h3 id="toc_5">第二次抓包</h3>
+
+<p>本以为迁移到其他机器上之后问题会消失, 没想到云集客户端超时的问题不就之后又复现了, 但是客户告知我们发现问题的时间距离问题实际发生的时间已经过了半个多小时, 我们上去对每个proxy执行<code>netstats</code>已经看不到任何异常了, 还好抓包没停, 我们分析slowlog, 抓包信息, 发现现象和之前完全一致, 基本可以断定是同一个问题, 这次由于部署了新版本的Proxy, 我们发现了更多的信息.</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_7.png" alt="Figure 7"></p>
+
+<p>从日志来看, 在后端连接异常断开的时候<code>SendCommandList</code>里已经堆积了好几百条命令, 再仔细分析, 我们发现是由于<code>SendCommandList</code>列表中第一个命令没有完全发送出去, 导致后面的命令被堆积了.</p>
+
+<p>第一个命令有一个特点, 就是特别大, 总体积达到了74103 Bytes, 但是我们发送了46336 Bytes之后, 后面的就没有再继续发送了, 最终堆积的这一系列命令都拿不到response, 和云集客户端等待响应超时(<code>wait response timeout</code>)是能够对的上的, 这时候我们有了两个怀疑的方向:</p>
+
+<ol>
+<li>Proxy代码出bug了, 没有把命令完全转发到Cache, 就把监听socket可写事件取消了, 导致就算我们虽然还有需要传给Cache的命令, 但是由于没有监听可写事件, 一直没有写出去. 但是经过我们对代码的反复确认, 基本排除了这种可能性.</li>
+<li>监听了socket的可写事件, 但是Cache端RevQ有堆积, 给Proxy返回了<code>ZeroWindow</code>导致Proxy没有可写事件触发, 无法将剩下的数据传送给Cache, 但是自己是感觉就算Cache端有包堆积, 也不至于堆积这么久, 直接导致连接卡死, 否则就是Cache真的有Bug? 好在问题发生的时候我们在Proxy和Cache侧都是有抓包的, 但是从抓包分析, 在问题发生的时间段, 没有任何<code>ZeroWindow</code>包产生.</li>
+</ol>
+
+<p>我们两个怀疑的方向都被推翻之后, 这个问题仿佛走进了死胡同, 这时我们将焦点集中在了Proxy打的下面这条日志中:</p>
+
+<div><pre><code class="language-cpp">not fully sent command(set item_subject.56216 {&quot;benefitPoint&quot;:&quot;&quot;,&quot;categoryIds&quot;:&quot;&quot;,&quot;componentInfos&quot;:&quot;[{\&quot;type\&quot;:\&quot;fixItems\&quot;,\&quot;value\&quot;:[11495]},{\&quot;type\... (73975 more bytes)), total size: 74103, already send: 46336</code></pre></div>
+
+<p>这条日志说明用户当时执行一个<code>set</code>命令,  key是<code>item_subject.56216</code>, value比较大, 使整个请求达到了将近73k, 但是我们发送了不到46k后面的就没有发了.</p>
+
+<p>虽然命令没能完全发送, 但是从<code>already send: 46336</code>这段日志可以肯定的是至少<code>set item_subject.56216</code>这段数据是已经发出去了的, 我们尝试在Cache侧的包和Proxy测的包来寻找有这段数据的TCP包, 但是竟然一条符合要求的记录都没有.</p>
+
+<p>问题查到这, 感觉手头这些信息和推导出的结论有点超出我的认知了:</p>
+
+<ol>
+<li>一直监听可写事件, 对端从来没有给我回<code>ZeroWindow</code>,  但是这条连接一直没有可写事件产生.</li>
+<li>数据已经写到socket里面去了, 但是在抓包中完全找不到符合要求的记录.</li>
+</ol>
+
+<h3 id="toc_6">冷静一下</h3>
+
+<p>这时候我们又重新对云集这几次出现问题获取的线索进行梳理和分析:</p>
+
+<ol>
+<li>我们对上报超长慢日志的proxy和后端异常断连的cache进行了分析, 发现几次出现问题上报超长慢日志的proxy并不只有一个, 并且后端异常断连对应的cache也不是一个, 这说明并不是由于总是一个结点故障导致的问题.</li>
+<li>一开始有怀疑是不是最近的proxy发版引入bug导致的问题, 但是这个猜测很快被推翻了, 因为另外一个实例也出现了相同的问题, 我们上去看了这个实例出问题proxy二进制的最后修改时间, 发现是去年11月份.</li>
+<li>重新整理了一下几次发生问题时proxy打印的日志, 我们发现问题发生时都有一个后端连接异常断开, 并且在连接异常断开时<code>SendCommandList</code>列表里都有堆积, 堆积的原因都是由于第一个超大的<code>set</code>请求没有发送完毕, 我们还发现问题先后出现了四次, 都集中在key是<code>item_subject.56216</code>和<code>item_subject.64509</code>的请求上, 前者value为70k, 后者value为80k, 紧接着我们随机扫描了一些其他同类型的key, 发现其他的key对应的value都只有十多二十k, 基本上可以肯定客户端超时问题是由于大请求导致的.</li>
+<li>从proxy日志表明, 我们已经把大请求的前面部分内容写入socket成功了, 但是cache端没有收到, 并且从proxy测抓包来看, 这段数据并没有经网卡发送出去.</li>
+<li>通过查看问题发生时proxy对应机器的监控信息, 发现没有单核被打满的现象, 也排除了proxy由于redis协议解析的bug导致了CPU的空转然后连接卡死的问题.</li>
+</ol>
+
+<h3 id="toc_7">问题再次出现, 这次有现场!</h3>
+
+<p>当天晚上客户在群里又反馈说发现了客户端超时的问题, 我们发现问题刚刚发生, 立马登录机器对用户实例的proxy进行<code>netstat</code>一一排查, 排查到第三个proxy时, 果然发现问题了, 发现有一条Proxy --&gt; Cache方向的连接<code>SendQ</code>有堆积:</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_8.png" alt="Figure 8"></p>
+
+<p>为了证明<code>SendQ</code>并不是偶尔有堆积, 而是一直卡死, 自己多截了几张现场的图, 并且把时间戳也带上了:</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_9.png" alt="Figure 9"></p>
+
+<p>从截图可以发现从<code>2020-08-05 21:08:43</code>到<code>2020-08-05  21:11:17</code>, 有一条连接的<code>SendQ</code>一直堆积了52128 Bytes的数据, 一个字节都没有消费.</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_10.png" alt="Figure 10"></p>
+
+<p>赶紧再登录到Cache的机器上看一下这条连接的情况:</p>
+
+<p><img src="../assets/img/ImgurAlbumYunjiGlobal/yunji-global_figure_11.png" alt="Figure 11"></p>
+
+<p>发现Cache端这条连接<code>RcvQ</code>和<code>SendQ</code>都是空的, 没有任何数据堆积, 这时候我们可以完全排除应用层的问题了, 也能成功解释之前我们数据已经成功写入套接字, 但是在抓包中却没有找到这段数据的疑问, 因为Proxy --&gt; Cache这条连接上的数据已经到了操作系统, 但是并没有经由网卡发送出去, 所以抓包我们抓不到, 然后由于是一直有数据待发送的, 所以Proxy --&gt; Cache这个方向上也不会发送<code>KeepAlive</code>包, 只会响应对端给自己发送的<code>KeepAlive</code>, 和我们之前观察到的现象完全一致.</p>
+
+<p>这时感觉问题上升到了操作系统层面, 于是赶紧将现场截图发给内核组同学排查, 他们经过确认之后, 发现操作系统内核之前的某一些版本确实存在对大包处理的一个bug, 这个内核bug是在<code>Kernel-tlinux2-0049</code>引入的, 然后在<code>Kernel-tlinux2-0051</code>进行了修复, 紧接着我们确认了一下出问题proxy机器对应的内核版本, 发现就是<code>Kernel-tlinux2-0049</code>.</p>
+
+<p>问题确认之后, 内核给了我们针对这个问题修复的热补丁, 我们将云集实例对应的proxy机器把热补丁打上, 后续便没有再出现类似问题了.</p>
+
+<h3 id="toc_8">总结</h3>
+
+<p>经历过这次线上问题排查, 自己有如下收获:</p>
+
+<ol>
+<li>proxy内部日志要尽量打全, 这样等到出现问题的时候才有利于快速定位.</li>
+<li>如果怀疑是其他组件或者是服务的问题时, 要找出证据进行证明, 这样更加严谨.</li>
+<li>对自己负责的项目代码要加深了解, 另外要自信, 相信自己的服务是稳定的.</li>
+<li>持续学习, 将计算机相关基础知识打牢, 这个非常重要.</li>
+</ol>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+<script type="text/javascript">
+Prism.languages.cpp=Prism.languages.extend("c",{keyword:/\b(alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,"boolean":/\b(true|false)\b/,operator:/[-+]{1,2}|!=?|<{1,2}=?|>{1,2}=?|\->|:{1,2}|={1,2}|\^|~|%|&{1,2}|\|?\||\?|\*|\/|\b(and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/}),Prism.languages.insertBefore("cpp","keyword",{"class-name":{pattern:/(class\s+)[a-z0-9_]+/i,lookbehind:!0}});
+</script>
+
+
+</body>
+
+</html>
