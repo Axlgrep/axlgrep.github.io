@@ -106,7 +106,7 @@ int aeCreateFileEvent(aeEventLoop *eventLoop, int fd, int mask,
 ### 时间事件
 Redis内部的时间事件实际可以分为两类, 一类是定时事件, 也就是需要在未来某一个时间点触发的事件(只触发一次), 另外一类是周期性事件, 和前面的定时事件只触发一次不同, 周期性事件是每隔一段时间又会重新触发一次.
 
-Redis使用了`timeProc`指向函数的返回值来判断当前属于哪类事件, 若函数返回`AE_NOMORE`(也就是-1), 说明当前事件无需再次触发(将id置删除标记`AE_DELETED_EVENT_ID`), 若函数返回一个大于等于0的值n, 说明再等待n秒, 该事件需要再重新被触发(根据返回值更新`when_sec`和`when_ms`), 在博客开头提到的`serverCron`时间事件实际上就是一个周期性事件, 函数末尾会返回`1000/server.hz`, `server.hz`默认被设置为`10`, 也就是说`serverCron`平均每间隔100ms会被调用一次.
+Redis使用了`timeProc`指向函数的返回值来判断当前属于哪类事件, 若函数返回`AE_NOMORE`(也就是-1), 说明当前事件无需再次触发(将id置删除标记`AE_DELETED_EVENT_ID`), 若函数返回一个大于等于0的值n, 说明再等待n毫秒, 该事件需要再重新被触发(根据返回值更新`when_sec`和`when_ms`), 在博客开头提到的`serverCron`时间事件实际上就是一个周期性事件, 函数末尾会返回`1000/server.hz`, `server.hz`默认被设置为`10`, 也就是说`serverCron`平均每间隔100ms会被调用一次.
 
 ```cpp
 /* Time event structure */
